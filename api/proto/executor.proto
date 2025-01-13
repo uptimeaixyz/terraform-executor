@@ -43,6 +43,29 @@ message DestroyResponse {
   string error = 3;     // Error message, if any
 }
 
+// Request for Terraform state list
+message GetStateListRequest {
+  string workspace = 1; // Name of the Terraform workspace
+}
+
+// Response for Terraform state list
+message GetStateListResponse {
+  bool success = 1;     // Whether the state list retrieval was successful
+  string state_list_output = 2;     // The Terraform state file content
+  string error = 3;     // Error message, if any
+}
+
+// Request to clear terraform files
+message ClearRequest {
+  string workspace = 1; // Name of the Terraform workspace
+}
+
+// Response to clear terraform files
+message ClearResponse {
+  bool success = 1;     // Whether the clear operation was successful
+  string error = 2;     // Error message, if any
+}
+
 // The Executor service definition.
 service Executor {
   // Generates a Terraform plan and returns the result.
@@ -53,4 +76,10 @@ service Executor {
 
   // Destroys the Terraform-managed infrastructure and returns the result.
   rpc Destroy(DestroyRequest) returns (DestroyResponse);
+
+  // Retrieves the Terraform state list.
+  rpc GetStateList(GetStateListRequest) returns (GetStateListResponse);
+
+  // Clears the Terraform files.
+  rpc Clear(ClearRequest) returns (ClearResponse);
 }

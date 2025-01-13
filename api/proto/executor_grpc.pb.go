@@ -19,9 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Executor_Plan_FullMethodName    = "/executor.Executor/Plan"
-	Executor_Apply_FullMethodName   = "/executor.Executor/Apply"
-	Executor_Destroy_FullMethodName = "/executor.Executor/Destroy"
+	Executor_Plan_FullMethodName         = "/executor.Executor/Plan"
+	Executor_Apply_FullMethodName        = "/executor.Executor/Apply"
+	Executor_Destroy_FullMethodName      = "/executor.Executor/Destroy"
+	Executor_GetStateList_FullMethodName = "/executor.Executor/GetStateList"
+	Executor_Clear_FullMethodName        = "/executor.Executor/Clear"
 )
 
 // ExecutorClient is the client API for Executor service.
@@ -36,6 +38,10 @@ type ExecutorClient interface {
 	Apply(ctx context.Context, in *ApplyRequest, opts ...grpc.CallOption) (*ApplyResponse, error)
 	// Destroys the Terraform-managed infrastructure and returns the result.
 	Destroy(ctx context.Context, in *DestroyRequest, opts ...grpc.CallOption) (*DestroyResponse, error)
+	// Retrieves the Terraform state list.
+	GetStateList(ctx context.Context, in *GetStateListRequest, opts ...grpc.CallOption) (*GetStateListResponse, error)
+	// Clears the Terraform files.
+	Clear(ctx context.Context, in *ClearRequest, opts ...grpc.CallOption) (*ClearResponse, error)
 }
 
 type executorClient struct {
@@ -76,6 +82,26 @@ func (c *executorClient) Destroy(ctx context.Context, in *DestroyRequest, opts .
 	return out, nil
 }
 
+func (c *executorClient) GetStateList(ctx context.Context, in *GetStateListRequest, opts ...grpc.CallOption) (*GetStateListResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetStateListResponse)
+	err := c.cc.Invoke(ctx, Executor_GetStateList_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *executorClient) Clear(ctx context.Context, in *ClearRequest, opts ...grpc.CallOption) (*ClearResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ClearResponse)
+	err := c.cc.Invoke(ctx, Executor_Clear_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ExecutorServer is the server API for Executor service.
 // All implementations must embed UnimplementedExecutorServer
 // for forward compatibility.
@@ -88,6 +114,10 @@ type ExecutorServer interface {
 	Apply(context.Context, *ApplyRequest) (*ApplyResponse, error)
 	// Destroys the Terraform-managed infrastructure and returns the result.
 	Destroy(context.Context, *DestroyRequest) (*DestroyResponse, error)
+	// Retrieves the Terraform state list.
+	GetStateList(context.Context, *GetStateListRequest) (*GetStateListResponse, error)
+	// Clears the Terraform files.
+	Clear(context.Context, *ClearRequest) (*ClearResponse, error)
 	mustEmbedUnimplementedExecutorServer()
 }
 
@@ -106,6 +136,12 @@ func (UnimplementedExecutorServer) Apply(context.Context, *ApplyRequest) (*Apply
 }
 func (UnimplementedExecutorServer) Destroy(context.Context, *DestroyRequest) (*DestroyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Destroy not implemented")
+}
+func (UnimplementedExecutorServer) GetStateList(context.Context, *GetStateListRequest) (*GetStateListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStateList not implemented")
+}
+func (UnimplementedExecutorServer) Clear(context.Context, *ClearRequest) (*ClearResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Clear not implemented")
 }
 func (UnimplementedExecutorServer) mustEmbedUnimplementedExecutorServer() {}
 func (UnimplementedExecutorServer) testEmbeddedByValue()                  {}
@@ -182,6 +218,42 @@ func _Executor_Destroy_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Executor_GetStateList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetStateListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExecutorServer).GetStateList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Executor_GetStateList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExecutorServer).GetStateList(ctx, req.(*GetStateListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Executor_Clear_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ClearRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExecutorServer).Clear(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Executor_Clear_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExecutorServer).Clear(ctx, req.(*ClearRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Executor_ServiceDesc is the grpc.ServiceDesc for Executor service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -200,6 +272,14 @@ var Executor_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Destroy",
 			Handler:    _Executor_Destroy_Handler,
+		},
+		{
+			MethodName: "GetStateList",
+			Handler:    _Executor_GetStateList_Handler,
+		},
+		{
+			MethodName: "Clear",
+			Handler:    _Executor_Clear_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
