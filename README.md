@@ -70,11 +70,16 @@ The service exposes these gRPC endpoints:
     ```
     rpc Destroy(DestroyRequest) returns (DestroyResponse) {}
     ```
+- GetStateList: Get the current state of the resources
+    ```
+    rpc GetStateList(GetStateListRequest) returns (GetStateListResponse) {}
+    ```
+- Clear: clear terraform files
+    ```
+    rpc Clear(ClearRequest) returns (ClearResponse) {}
+    ```
+
 TO DO:
-- GetState: Get the current state of the resources
-    ```
-    rpc GetState(GetStateRequest) returns (GetStateResponse) {}
-    ```
 - GetOutput: Get the output of the last operation
     ```
     rpc GetOutput(GetOutputRequest) returns (GetOutputResponse) {}
