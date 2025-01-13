@@ -1,0 +1,16 @@
+#cloud-config
+users:
+  - name: deployer
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDGCy5qEabKznyEYKCTm2eqBilPpKEpEWM1JoFV/M0FuIJcmHmy1uH6KtKQSwThIC65nzwyhmqIPJ3RH/r2B6t2ZIEmUOfOjZZpInBnoCGIqcVabdkhDmJ0eSZ/pMguhQJDUDJwf9rPTGW7Od4FI5etCcU6CBXMAE5GX8UkJ9YAejoFCgPFQfvSgHeonJKiRf0QTNZNN79ecMNv3XCHck7TYiHrGifUaaW9fpR40IP7oFJ1Gaw64J8unWqEZOeCCKZLzG/Shhnaf4AELX70NwXUxFNrk/vrpXw6PSDygfWJetD66FGD+f1EQJSCYgUKs86DQvw5TwF/emNZ2UZnr8ZRR5UnOsaIOndhphlIzXMI4GbXSovLgiH+Vsr9BtQjbZnsMIdoMVLgggQL/Sy6PjlTnEP/dyeUvg1Liefyr08FUx2nlQU6MeuRq8qMzJZ9jwO3447HQy3xG46v++ftUh1RnYT4//EG3GGJId1WbbusTZfi1WFeFO86ASrT4waJaE8=
+      
+timezone: UTC
+
+packages:
+  - unattended-upgrades
+
+runcmd:
+  - passwd -d root
+  - apt remove -y python-minimal
