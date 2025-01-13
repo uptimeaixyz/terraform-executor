@@ -1,0 +1,46 @@
+# Go build files
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go workspace files
+go.work
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Git files
+.git/
+.gitignore
+
+# Build output
+bin/
+dist/
+
+# Dependencies
+vendor/
+
+# Debug files
+debug/
+
+# Test cache
+testdata/
+
+# Environment files
+.env
+*.env
+.env.*
+
+# Log files
+*.log
