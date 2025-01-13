@@ -3,11 +3,15 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"terraform-executor/api/handlers"
 )
 
 func main() {
-	address := ":50051"
+	address := os.Getenv("LISTEN")
+	if address == "" {
+		address = ":50051"
+	}
 	fmt.Printf("Starting gRPC server on %s\n", address)
 
 	err := handlers.StartServer(address)
