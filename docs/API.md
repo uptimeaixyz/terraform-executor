@@ -1,5 +1,19 @@
 # API Reference
 
+## Table of contents
+- [Executor Service](#executor-service)
+    - [CreateContext](#createcontext)
+    - [DeleteContext](#deletecontext)
+    - [CreateWorkspace](#createworkspace)
+    - [DeleteWorkspace](#deleteworkspace)
+    - [AddProviders](#addproviders)
+    - [AppendCode](#appendcode)
+    - [Plan](#plan)
+    - [Apply](#apply)
+    - [Destroy](#destroy)
+    - [GetStateList](#getstatelist)
+    - [ClearCode](#clearcode)
+
 ## Executor Service
 
 The `Executor` service provides methods to manage Terraform operations such as planning, applying, destroying infrastructure, and managing contexts and workspaces.
@@ -19,7 +33,7 @@ Creates a new context.
 ```bash
 # Create a new context
 grpcurl -plaintext -d '{
-  "context": "dev"
+    "context": "dev"
 }' localhost:50051 executor.Executor/CreateContext
 ```
 
@@ -38,7 +52,7 @@ Deletes a context.
 ```bash
 # Delete a context
 grpcurl -plaintext -d '{
-  "context": "dev"
+    "context": "dev"
 }' localhost:50051 executor.Executor/DeleteContext
 ```
 
@@ -58,8 +72,8 @@ Creates a workspace within a context.
 ```bash
 # Create a new workspace
 grpcurl -plaintext -d '{
-  "context": "dev",
-  "workspace": "project-a"
+    "context": "dev",
+    "workspace": "project-a"
 }' localhost:50051 executor.Executor/CreateWorkspace
 ```
 
@@ -79,8 +93,8 @@ Deletes a workspace within a context.
 ```bash
 # Delete a workspace
 grpcurl -plaintext -d '{
-  "context": "dev",
-  "workspace": "project-a"
+    "context": "dev",
+    "workspace": "project-a"
 }' localhost:50051 executor.Executor/DeleteWorkspace
 ```
 
@@ -92,9 +106,9 @@ Adds providers to the Terraform configuration.
 - `string context`: Name of the context
 - `string workspace`: Name of the workspace
 - `repeated Provider providers`: List of providers to add
-    - `string name`: Name of the provider
-    - `string source`: Source of the provider
-    - `string version`: Version of the provider
+        - `string name`: Name of the provider
+        - `string source`: Source of the provider
+        - `string version`: Version of the provider
 
 **Response:** `AddProvidersResponse`
 - `bool success`: Whether the provider addition was successful
@@ -104,20 +118,20 @@ Adds providers to the Terraform configuration.
 ```bash
 # Add providers to the Terraform configuration
 grpcurl -plaintext -d '{
-  "context": "dev",
-  "workspace": "project-a",
-  "providers": [
-    {
-      "name": "aws",
-      "source": "hashicorp/aws",
-      "version": "3.0.0"
-    },
-    {
-      "name": "digitalocean",
-      "source": "digitalocean/digitalocean",
-      "version": "~> 2.0"
-    }
-  ]
+    "context": "dev",
+    "workspace": "project-a",
+    "providers": [
+        {
+            "name": "aws",
+            "source": "hashicorp/aws",
+            "version": "3.0.0"
+        },
+        {
+            "name": "digitalocean",
+            "source": "digitalocean/digitalocean",
+            "version": "~> 2.0"
+        }
+    ]
 }' localhost:50051 executor.Executor/AddProviders
 ```
 
@@ -137,9 +151,9 @@ Appends code to the configuration file.
 ```bash
 # Append code to the Terraform configuration
 grpcurl -plaintext -d '{
-  "context": "dev",
-  "workspace": "project-a",
-  "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"my-terraform-bucket\"\n  tags = {\n    Environment = \"Dev\"\n  }\n}"
+    "context": "dev",
+    "workspace": "project-a",
+    "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"my-terraform-bucket\"\n  tags = {\n    Environment = \"Dev\"\n  }\n}"
 }' localhost:50051 executor.Executor/AppendCode
 ```
 
@@ -160,8 +174,8 @@ Generates a Terraform plan and returns the result.
 ```bash
 # Run a Terraform plan
 grpcurl -plaintext -d '{
-  "context": "dev",
-  "workspace": "project-a"
+    "context": "dev",
+    "workspace": "project-a"
 }' localhost:50051 executor.Executor/Plan
 ```
 
@@ -183,8 +197,8 @@ Applies the Terraform plan and returns the execution result.
 ```bash
 # Apply the Terraform configuration
 grpcurl -plaintext -d '{
-  "context": "dev",
-  "workspace": "project-a",
+    "context": "dev",
+    "workspace": "project-a",
 }' localhost:50051 executor.Executor/Apply
 ```
 
@@ -205,8 +219,8 @@ Destroys the Terraform-managed infrastructure and returns the result.
 ```bash
 # Destroy the Terraform-managed infrastructure
 grpcurl -plaintext -d '{
-  "context": "dev",
-  "workspace": "project-a",
+    "context": "dev",
+    "workspace": "project-a",
 }' localhost:50051 executor.Executor/Destroy
 ```
 
@@ -227,8 +241,8 @@ Retrieves the Terraform state list.
 ```bash
 # Get the Terraform state list
 grpcurl -plaintext -d '{
-  "context": "dev",
-  "workspace": "project-a",
+    "context": "dev",
+    "workspace": "project-a",
 }' localhost:50051 executor.Executor/GetStateList
 ```
 
@@ -248,7 +262,7 @@ Clears the main.tf file.
 ```bash
 # Clear the Terraform configuration
 grpcurl -plaintext -d '{
-  "context": "dev",
-  "workspace": "project-a",
+    "context": "dev",
+    "workspace": "project-a",
 }' localhost:50051 executor.Executor/ClearCode
 ```
