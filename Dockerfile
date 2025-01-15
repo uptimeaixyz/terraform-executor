@@ -11,6 +11,6 @@ WORKDIR /app
 COPY --from=builder /app/main .
 RUN chmod +x /app/main
 
-ENV LISTEN 0.0.0.0:50051
+ENV LISTEN=0.0.0.0:50051
 
 ENTRYPOINT ["/app/main"]
