@@ -4,10 +4,23 @@ package executor;
 
 option go_package = "api/proto;executor";
 
+// Request to append code to configuration
+message AppendCodeRequest {
+  string context = 1; // Name of the context
+  string workspace = 2; // Name of the Terraform workspace
+  string code = 3; // The Terraform configuration code snippet
+}
+
+// Response to append code to configuration
+message AppendCodeResponse {
+  bool success = 1;     // Whether the code append operation was successful
+  string error = 2;     // Error message, if any
+}
+
 // Request for Terraform Plan
 message PlanRequest {
-  string workspace = 1; // Name of the Terraform workspace
-  string code = 2;      // The Terraform configuration code snippet
+  string context = 1; // Name of the context
+  string workspace = 2; // Name of the Terraform workspace
 }
 
 // Response for Terraform Plan
@@ -19,9 +32,9 @@ message PlanResponse {
 
 // Request for Terraform Apply
 message ApplyRequest {
-  string workspace = 1; // Name of the Terraform workspace
-  string plan_file = 2; // Path to the saved Terraform plan file (optional)
-  string code = 3;      // The Terraform configuration code snippet (optional)
+  string context = 1; // Name of the context
+  string workspace = 2; // Name of the Terraform workspace
+  string plan_file = 3; // Path to the saved Terraform plan file (optional)
 }
 
 // Response for Terraform Apply
@@ -33,7 +46,8 @@ message ApplyResponse {
 
 // Request for Terraform Destroy
 message DestroyRequest {
-  string workspace = 1; // Name of the Terraform workspace
+  string context = 1; // Name of the context
+  string workspace = 2; // Name of the Terraform workspace
 }
 
 // Response for Terraform Destroy
@@ -45,7 +59,8 @@ message DestroyResponse {
 
 // Request for Terraform state list
 message GetStateListRequest {
-  string workspace = 1; // Name of the Terraform workspace
+  string context = 1; // Name of the context
+  string workspace = 2; // Name of the Terraform workspace
 }
 
 // Response for Terraform state list
@@ -55,19 +70,89 @@ message GetStateListResponse {
   string error = 3;     // Error message, if any
 }
 
-// Request to clear terraform files
-message ClearRequest {
-  string workspace = 1; // Name of the Terraform workspace
+// Request to clear terraform code
+message ClearCodeRequest {
+  string context = 1; // Name of the context
+  string workspace = 2; // Name of the Terraform workspace
 }
 
-// Response to clear terraform files
-message ClearResponse {
+// Response to clear terraform code
+message ClearCodeResponse {
   bool success = 1;     // Whether the clear operation was successful
   string error = 2;     // Error message, if any
 }
 
+// Request to create new context
+message CreateContextRequest {
+  string context = 1; // Name of the context
+}
+
+// Response to create new context
+message CreateContextResponse {
+  bool success = 1;     // Whether the context creation was successful
+  string error = 2;     // Error message, if any
+}
+
+// Request to delete context
+message DeleteContextRequest {
+  string context = 1; // Name of the context
+}
+
+// Response to delete context
+message DeleteContextResponse {
+  bool success = 1;     // Whether the context deletion was successful
+  string error = 2;     // Error message, if any
+}
+
+// Request to create workspace within context
+message CreateWorkspaceRequest {
+  string context = 1; // Name of the context
+  string workspace = 2; // Name of the workspace
+}
+
+// Response to create workspace within context
+message CreateWorkspaceResponse {
+  bool success = 1;     // Whether the workspace creation was successful
+  string error = 2;     // Error message, if any
+}
+
+// Request to delete workspace within context
+message DeleteWorkspaceRequest {
+  string context = 1; // Name of the context
+  string workspace = 2; // Name of the workspace
+}
+
+// Response to delete workspace within context
+message DeleteWorkspaceResponse {
+  bool success = 1;     // Whether the workspace deletion was successful
+  string error = 2;     // Error message, if any
+}
+
+// Request to add providers to the Terraform configuration
+message AddProvidersRequest {
+  string context = 1; // Name of the context
+  string workspace = 2; // Name of the workspace
+  repeated Provider providers = 3; // List of providers to add
+
+  message Provider {
+    string name = 1; // Name of the provider
+    string source = 2; // Source of the provider
+    string version = 3; // Version of the provider
+  }
+}
+
+// Response to add providers to the Terraform configuration
+message AddProvidersResponse {
+  bool success = 1;     // Whether the provider addition was successful
+  string error = 2;     // Error message, if any
+}
+
+
 // The Executor service definition.
 service Executor {
+  // Appends code to the Terraform configuration.
+  rpc AppendCode(AppendCodeRequest) returns (AppendCodeResponse);
+
   // Generates a Terraform plan and returns the result.
   rpc Plan(PlanRequest) returns (PlanResponse);
 
@@ -81,5 +166,20 @@ service Executor {
   rpc GetStateList(GetStateListRequest) returns (GetStateListResponse);
 
   // Clears the Terraform files.
-  rpc Clear(ClearRequest) returns (ClearResponse);
+  rpc ClearCode(ClearCodeRequest) returns (ClearCodeResponse);
+
+  // Creates a new context.
+  rpc CreateContext(CreateContextRequest) returns (CreateContextResponse);
+
+  // Deletes a context.
+  rpc DeleteContext(DeleteContextRequest) returns (DeleteContextResponse);
+
+  // Creates a workspace within a context.
+  rpc CreateWorkspace(CreateWorkspaceRequest) returns (CreateWorkspaceResponse);
+
+  // Deletes a workspace within a context.
+  rpc DeleteWorkspace(DeleteWorkspaceRequest) returns (DeleteWorkspaceResponse);
+
+  // Adds providers to the Terraform configuration.
+  rpc AddProviders(AddProvidersRequest) returns (AddProvidersResponse);
 }
