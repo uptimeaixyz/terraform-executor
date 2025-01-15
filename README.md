@@ -55,63 +55,25 @@ go mod download
 ```
 go build -o terraform-executor cmd/server/main.go
 ```
+or
+```
+docker build -t terraform-executor .
+```
 
 ## API endpoints
-The service exposes these gRPC endpoints:
-- Plan: Generate an execution plan
-    ```
-    rpc Plan(PlanRequest) returns (PlanResponse) {}
-    ```
-- Apply: Apply the configuration
-    ```
-    rpc Apply(ApplyRequest) returns (ApplyResponse) {}
-    ```
-- Destroy: Destroy the resources
-    ```
-    rpc Destroy(DestroyRequest) returns (DestroyResponse) {}
-    ```
-- GetStateList: Get the current state of the resources
-    ```
-    rpc GetStateList(GetStateListRequest) returns (GetStateListResponse) {}
-    ```
-- Clear: clear terraform files
-    ```
-    rpc Clear(ClearRequest) returns (ClearResponse) {}
-    ```
+For detailed API documentation, please refer to the [API Documentation](docs/API.md).
 
-TO DO:
-- GetOutput: Get the output of the last operation
-    ```
-    rpc GetOutput(GetOutputRequest) returns (GetOutputResponse) {}
-    ```
-- GetLogs: Get the logs of the last operation
-    ```
-    rpc GetLogs(GetLogsRequest) returns (GetLogsResponse) {}
-    ```
-
-## Usage
+## Run
 1. Start the gRPC server
     ```
     ./terraform-executor
     ```
+    or
+    ```
+    mkdir -p data
+    docker run -p 50051:50051 -v ./data/:/app/data terraform-executor
+    ```
 2. Send gRPC requests with grpcurl or any gRPC client
-
-## Example usage with grpcurl
-
-Generate a plan:
-
-    grpcurl -plaintext -d '{"workspace": "default_workspace", "code": "resource \"example\" {...}"}' \
-        localhost:50051 executor.Executor/Plan
-
-Apply the configuration:
-
-    grpcurl -plaintext -d '{"workspace": "default_workspace", "code": "resource \"example\" {...}"}' \
-        localhost:50051 executor.Executor/Apply
-
-Destroy the resources:
-
-    grpcurl -plaintext -d '{"workspace": "default_workspace", "code": "resource \"example\" {...}"}' \
-        localhost:50051 executor.Executor/Destroy
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
