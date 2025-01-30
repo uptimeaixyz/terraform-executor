@@ -13,6 +13,11 @@
     - [Destroy](#destroy)
     - [GetStateList](#getstatelist)
     - [ClearCode](#clearcode)
+    - [ClearProviders](#clearproviders)
+    - [AddSecretEnv](#addsecretenv)
+    - [AddSecretVar](#addsecretvar)
+    - [ClearSecretVars](#clearsecretvars)
+    - [ClearWorkspace](#clearworkspace)
 
 ## Executor Service
 
@@ -265,4 +270,135 @@ grpcurl -plaintext -d '{
     "context": "dev",
     "workspace": "project-a",
 }' localhost:50051 executor.Executor/ClearCode
+```
+
+### ClearProviders
+
+Clears providers from the Terraform configuration.
+
+**Request:** `ClearProvidersRequest`
+- `string context`: Name of the context
+- `string workspace`: Name of the workspace
+
+**Response:** `ClearProvidersResponse`
+- `bool success`: Whether the provider clear operation was successful
+- `string error`: Error message, if any
+
+**Example:**
+```bash
+# Clear providers from the Terraform configuration
+grpcurl -plaintext -d '{
+    "context": "dev",
+    "workspace": "project-a"
+}' localhost:50051 executor.Executor/ClearProviders
+```
+
+### AddSecretEnv
+
+Adds secret environment variables to the Terraform configuration.
+
+**Request:** `AddSecretEnvRequest`
+- `string context`: Name of the context
+- `string workspace`: Name of the workspace
+- `repeated SecretEnv secrets`: List of secret environment variables to add
+        - `string key`: Key of the secret environment variable
+        - `string value`: Value of the secret environment variable
+
+**Response:** `AddSecretEnvResponse`
+- `bool success`: Whether the secret environment variable addition was successful
+- `string error`: Error message, if any
+
+**Example:**
+```bash
+# Add secret environment variables to the Terraform configuration
+grpcurl -plaintext -d '{
+    "context": "dev",
+    "workspace": "project-a",
+    "secrets": [
+        {
+            "key": "AWS_ACCESS_KEY_ID",
+            "value": "your-access-key-id"
+        },
+        {
+            "key": "AWS_SECRET_ACCESS_KEY",
+            "value": "your-secret-access-key"
+        }
+    ]
+}' localhost:50051 executor.Executor/AddSecretEnv
+```
+
+### AddSecretVar
+
+Adds secret variables to the Terraform configuration.
+
+**Request:** `AddSecretVarRequest`
+- `string context`: Name of the context
+- `string workspace`: Name of the workspace
+- `repeated SecretVar secrets`: List of secret variables to add
+        - `string key`: Key of the secret variable
+        - `string value`: Value of the secret variable
+
+**Response:** `AddSecretVarResponse`
+- `bool success`: Whether the secret variable addition was successful
+- `string error`: Error message, if any
+
+**Example:**
+```bash
+# Add secret variables to the Terraform configuration
+grpcurl -plaintext -d '{
+    "context": "dev",
+    "workspace": "project-a",
+    "secrets": [
+        {
+            "key": "db_password",
+            "value": "your-db-password"
+        },
+        {
+            "key": "api_key",
+            "value": "your-api-key"
+        }
+    ]
+}' localhost:50051 executor.Executor/AddSecretVar
+```
+
+### ClearSecretVars
+
+Clears secret variables from the Terraform configuration.
+
+**Request:** `ClearSecretVarsRequest`
+- `string context`: Name of the context
+- `string workspace`: Name of the workspace
+
+**Response:** `ClearSecretVarsResponse`
+- `bool success`: Whether the secret variable clear operation was successful
+- `string error`: Error message, if any
+
+**Example:**
+```bash
+# Clear secret variables from the Terraform configuration
+grpcurl -plaintext -d '{
+    "context": "dev",
+    "workspace": "project-a"
+}' localhost:50051 executor.Executor/ClearSecretVars
+```
+
+### ClearWorkspace
+
+Clears the Terraform workspace.
+
+**Request:** `ClearWorkspaceRequest`
+- `string context`: Name of the context
+- `string workspace`: Name of the workspace
+
+**Response:** `ClearWorkspaceResponse`
+- `bool success`: Whether the workspace clear operation was successful
+- `string error`: Error message, if any
+
+**Example:**
+```bash
+# Clear the Terraform workspace
+grpcurl -plaintext -d '{
+    "context": "dev",
+    "workspace": "project-a"
+}' localhost:50051 executor.Executor/ClearWorkspace
 ```
