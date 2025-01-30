@@ -270,10 +270,12 @@ func (s *ExecutorService) AddSecretEnv(ctx context.Context, req *pb.AddSecretEnv
 		return &pb.AddSecretEnvResponse{Success: false, Error: fmt.Sprintf("failed to create workspace: %v", err)}, nil
 	}
 
-	// Append secret to .env file
+	// Append secrets to .env file
 	envPath := filepath.Join(workspaceDir, ".env")
-	if err := utils.AppendToFile(envPath, fmt.Sprintf("%s=%s", req.SecretName, req.SecretValue)); err != nil {
-		return &pb.AddSecretEnvResponse{Success: false, Error: fmt.Sprintf("failed to write to .env: %v", err)}, nil
+	for _, secret := range req.Secrets {
+		if err := utils.AppendToFile(envPath, fmt.Sprintf("%s=%s\n", secret.Name, secret.Value)); err != nil {
+			return &pb.AddSecretEnvResponse{Success: false, Error: fmt.Sprintf("failed to write to .env: %v", err)}, nil
+		}
 	}
 
 	return &pb.AddSecretEnvResponse{Success: true}, nil
@@ -289,10 +291,13 @@ func (s *ExecutorService) AddSecretVar(ctx context.Context, req *pb.AddSecretVar
 		return &pb.AddSecretVarResponse{Success: false, Error: fmt.Sprintf("failed to create workspace: %v", err)}, nil
 	}
 
-	// Append secret to variables.tf file
+	// Append secrets to variables.tf file
 	varsPath := filepath.Join(workspaceDir, "variables.tf")
-	if err := utils.AppendToFile(varsPath, fmt.Sprintf("variable \"%s\" {\n  type = string\n  default = \"%s\"\n}\n", req.SecretName, req.SecretValue)); err != nil {
-		return &pb.AddSecretVarResponse{Success: false, Error: fmt.Sprintf("failed to write to variables.tf: %v", err)}, nil
+	for _, secret := range req.Secrets {
+		varDef := fmt.Sprintf("variable \"%s\" {\n  type = string\n  default = \"%s\"\n}\n", secret.Name, secret.Value)
+		if err := utils.AppendToFile(varsPath, varDef); err != nil {
+			return &pb.AddSecretVarResponse{Success: false, Error: fmt.Sprintf("failed to write to variables.tf: %v", err)}, nil
+		}
 	}
 
 	return &pb.AddSecretVarResponse{Success: true}, nil

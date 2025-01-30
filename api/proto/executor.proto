@@ -171,12 +171,16 @@ message ClearWorkspaceResponse {
   string error = 2;     // Error message, if any
 }
 
-// Request to add a secret env to the Terraform configuration
+// Request to add secret env variables to the Terraform configuration
 message AddSecretEnvRequest {
   string context = 1; // Name of the context
   string workspace = 2; // Name of the workspace
-  string secret_name = 3; // Secret to add
-  string secret_value = 4; // Value of the secret
+  repeated Secret secrets = 3; // List of secrets to add
+
+  message Secret {
+    string name = 1;  // Name of the secret
+    string value = 2; // Value of the secret
+  }
 }
 
 // Response to add a secret to the Terraform configuration
@@ -185,12 +189,16 @@ message AddSecretEnvResponse {
   string error = 2;     // Error message, if any
 }
 
-// Request to add a secret variable to the Terraform configuration
+// Request to add secret terraform variables to the Terraform configuration
 message AddSecretVarRequest {
   string context = 1; // Name of the context
   string workspace = 2; // Name of the workspace
-  string secret_name = 3; // Secret to add
-  string secret_value = 4; // Value of the secret
+  repeated Secret secrets = 3; // List of secrets to add
+
+  message Secret {
+    string name = 1;  // Name of the secret
+    string value = 2; // Value of the secret
+  }
 }
 
 // Response to add a secret to the Terraform configuration

@@ -137,13 +137,21 @@ func addAwsProvider(ctx context.Context, svc *executor.ExecutorService, contextN
 	return nil
 }
 
-// addSecretEnv adds a secret environment variable to the workspace
+// addSecretEnv adds secret environment variables to the workspace
 func addSecretEnv(ctx context.Context, svc *executor.ExecutorService, contextName, workspaceName string) error {
 	resp, err := svc.AddSecretEnv(ctx, &pb.AddSecretEnvRequest{
-		Context:     contextName,
-		Workspace:   workspaceName,
-		SecretName:  "AWS_REGION",
-		SecretValue: "us-west-2",
+		Context:   contextName,
+		Workspace: workspaceName,
+		Secrets: []*pb.AddSecretEnvRequest_Secret{
+			{
+				Name:  "AWS_REGION",
+				Value: "us-west-2",
+			},
+			{
+				Name:  "AWS_ACCESS_KEY_ID",
+				Value: "test-access-key",
+			},
+		},
 	})
 	if err != nil {
 		return fmt.Errorf("failed to add secret env: %v", err)
@@ -151,17 +159,25 @@ func addSecretEnv(ctx context.Context, svc *executor.ExecutorService, contextNam
 	if !resp.Success {
 		return fmt.Errorf("secret env addition failed: %s", resp.Error)
 	}
-	fmt.Println("Secret env added successfully")
+	fmt.Println("Secret env variables added successfully")
 	return nil
 }
 
-// addSecretVar adds a secret variable to the workspace
+// addSecretVar adds secret variables to the workspace
 func addSecretVar(ctx context.Context, svc *executor.ExecutorService, contextName, workspaceName string) error {
 	resp, err := svc.AddSecretVar(ctx, &pb.AddSecretVarRequest{
-		Context:     contextName,
-		Workspace:   workspaceName,
-		SecretName:  "do_token",
-		SecretValue: "my-digital-ocean-token",
+		Context:   contextName,
+		Workspace: workspaceName,
+		Secrets: []*pb.AddSecretVarRequest_Secret{
+			{
+				Name:  "do_token",
+				Value: "my-digital-ocean-token",
+			},
+			{
+				Name:  "db_password",
+				Value: "super-secret-password",
+			},
+		},
 	})
 
 	if err != nil {
@@ -170,7 +186,7 @@ func addSecretVar(ctx context.Context, svc *executor.ExecutorService, contextNam
 	if !resp.Success {
 		return fmt.Errorf("secret var addition failed: %s", resp.Error)
 	}
-	fmt.Println("Secret var added successfully")
+	fmt.Println("Secret variables added successfully")
 	return nil
 }
 
@@ -206,10 +222,10 @@ func planInfrastructure(ctx context.Context, svc *executor.ExecutorService, cont
 	if err != nil {
 		return fmt.Errorf("failed to plan: %v", err)
 	}
+	fmt.Printf("Plan output:\n%s\n", resp.PlanOutput)
 	if !resp.Success {
 		return fmt.Errorf("plan failed: %s", resp.Error)
 	}
-	fmt.Printf("Plan output:\n%s\n", resp.PlanOutput)
 	return nil
 }
 

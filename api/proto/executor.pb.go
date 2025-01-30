@@ -1438,13 +1438,12 @@ func (x *ClearWorkspaceResponse) GetError() string {
 	return ""
 }
 
-// Request to add a secret env to the Terraform configuration
+// Request to add secret env variables to the Terraform configuration
 type AddSecretEnvRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Context       string                 `protobuf:"bytes,1,opt,name=context,proto3" json:"context,omitempty"`                            // Name of the context
-	Workspace     string                 `protobuf:"bytes,2,opt,name=workspace,proto3" json:"workspace,omitempty"`                        // Name of the workspace
-	SecretName    string                 `protobuf:"bytes,3,opt,name=secret_name,json=secretName,proto3" json:"secret_name,omitempty"`    // Secret to add
-	SecretValue   string                 `protobuf:"bytes,4,opt,name=secret_value,json=secretValue,proto3" json:"secret_value,omitempty"` // Value of the secret
+	state         protoimpl.MessageState        `protogen:"open.v1"`
+	Context       string                        `protobuf:"bytes,1,opt,name=context,proto3" json:"context,omitempty"`     // Name of the context
+	Workspace     string                        `protobuf:"bytes,2,opt,name=workspace,proto3" json:"workspace,omitempty"` // Name of the workspace
+	Secrets       []*AddSecretEnvRequest_Secret `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty"`     // List of secrets to add
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1493,18 +1492,11 @@ func (x *AddSecretEnvRequest) GetWorkspace() string {
 	return ""
 }
 
-func (x *AddSecretEnvRequest) GetSecretName() string {
+func (x *AddSecretEnvRequest) GetSecrets() []*AddSecretEnvRequest_Secret {
 	if x != nil {
-		return x.SecretName
+		return x.Secrets
 	}
-	return ""
-}
-
-func (x *AddSecretEnvRequest) GetSecretValue() string {
-	if x != nil {
-		return x.SecretValue
-	}
-	return ""
+	return nil
 }
 
 // Response to add a secret to the Terraform configuration
@@ -1560,13 +1552,12 @@ func (x *AddSecretEnvResponse) GetError() string {
 	return ""
 }
 
-// Request to add a secret variable to the Terraform configuration
+// Request to add secret terraform variables to the Terraform configuration
 type AddSecretVarRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Context       string                 `protobuf:"bytes,1,opt,name=context,proto3" json:"context,omitempty"`                            // Name of the context
-	Workspace     string                 `protobuf:"bytes,2,opt,name=workspace,proto3" json:"workspace,omitempty"`                        // Name of the workspace
-	SecretName    string                 `protobuf:"bytes,3,opt,name=secret_name,json=secretName,proto3" json:"secret_name,omitempty"`    // Secret to add
-	SecretValue   string                 `protobuf:"bytes,4,opt,name=secret_value,json=secretValue,proto3" json:"secret_value,omitempty"` // Value of the secret
+	state         protoimpl.MessageState        `protogen:"open.v1"`
+	Context       string                        `protobuf:"bytes,1,opt,name=context,proto3" json:"context,omitempty"`     // Name of the context
+	Workspace     string                        `protobuf:"bytes,2,opt,name=workspace,proto3" json:"workspace,omitempty"` // Name of the workspace
+	Secrets       []*AddSecretVarRequest_Secret `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty"`     // List of secrets to add
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1615,18 +1606,11 @@ func (x *AddSecretVarRequest) GetWorkspace() string {
 	return ""
 }
 
-func (x *AddSecretVarRequest) GetSecretName() string {
+func (x *AddSecretVarRequest) GetSecrets() []*AddSecretVarRequest_Secret {
 	if x != nil {
-		return x.SecretName
+		return x.Secrets
 	}
-	return ""
-}
-
-func (x *AddSecretVarRequest) GetSecretValue() string {
-	if x != nil {
-		return x.SecretValue
-	}
-	return ""
+	return nil
 }
 
 // Response to add a secret to the Terraform configuration
@@ -1848,6 +1832,110 @@ func (x *AddProvidersRequest_Provider) GetVersion() string {
 	return ""
 }
 
+type AddSecretEnvRequest_Secret struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`   // Name of the secret
+	Value         string                 `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"` // Value of the secret
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddSecretEnvRequest_Secret) Reset() {
+	*x = AddSecretEnvRequest_Secret{}
+	mi := &file_api_proto_executor_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddSecretEnvRequest_Secret) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddSecretEnvRequest_Secret) ProtoMessage() {}
+
+func (x *AddSecretEnvRequest_Secret) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_executor_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddSecretEnvRequest_Secret.ProtoReflect.Descriptor instead.
+func (*AddSecretEnvRequest_Secret) Descriptor() ([]byte, []int) {
+	return file_api_proto_executor_proto_rawDescGZIP(), []int{26, 0}
+}
+
+func (x *AddSecretEnvRequest_Secret) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *AddSecretEnvRequest_Secret) GetValue() string {
+	if x != nil {
+		return x.Value
+	}
+	return ""
+}
+
+type AddSecretVarRequest_Secret struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`   // Name of the secret
+	Value         string                 `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"` // Value of the secret
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddSecretVarRequest_Secret) Reset() {
+	*x = AddSecretVarRequest_Secret{}
+	mi := &file_api_proto_executor_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddSecretVarRequest_Secret) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddSecretVarRequest_Secret) ProtoMessage() {}
+
+func (x *AddSecretVarRequest_Secret) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_executor_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddSecretVarRequest_Secret.ProtoReflect.Descriptor instead.
+func (*AddSecretVarRequest_Secret) Descriptor() ([]byte, []int) {
+	return file_api_proto_executor_proto_rawDescGZIP(), []int{28, 0}
+}
+
+func (x *AddSecretVarRequest_Secret) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *AddSecretVarRequest_Secret) GetValue() string {
+	if x != nil {
+		return x.Value
+	}
+	return ""
+}
+
 var File_api_proto_executor_proto protoreflect.FileDescriptor
 
 var file_api_proto_executor_proto_rawDesc = []byte{
@@ -1992,30 +2080,36 @@ var file_api_proto_executor_proto_rawDesc = []byte{
 	0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x73, 0x75,
 	0x63, 0x63, 0x65, 0x73, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x07, 0x73, 0x75, 0x63,
 	0x63, 0x65, 0x73, 0x73, 0x12, 0x14, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x91, 0x01, 0x0a, 0x13, 0x41,
+	0x01, 0x28, 0x09, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x22, 0xc1, 0x01, 0x0a, 0x13, 0x41,
 	0x64, 0x64, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x45, 0x6e, 0x76, 0x52, 0x65, 0x71, 0x75, 0x65,
 	0x73, 0x74, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74, 0x18, 0x01, 0x20,
 	0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74, 0x12, 0x1c, 0x0a, 0x09,
 	0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x09, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x1f, 0x0a, 0x0b, 0x73, 0x65,
-	0x63, 0x72, 0x65, 0x74, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x0a, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x21, 0x0a, 0x0c, 0x73,
-	0x65, 0x63, 0x72, 0x65, 0x74, 0x5f, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x0b, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x46,
+	0x09, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x3e, 0x0a, 0x07, 0x73, 0x65,
+	0x63, 0x72, 0x65, 0x74, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x24, 0x2e, 0x65, 0x78,
+	0x65, 0x63, 0x75, 0x74, 0x6f, 0x72, 0x2e, 0x41, 0x64, 0x64, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74,
+	0x45, 0x6e, 0x76, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x53, 0x65, 0x63, 0x72, 0x65,
+	0x74, 0x52, 0x07, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x73, 0x1a, 0x32, 0x0a, 0x06, 0x53, 0x65,
+	0x63, 0x72, 0x65, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x46,
 	0x0a, 0x14, 0x41, 0x64, 0x64, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x45, 0x6e, 0x76, 0x52, 0x65,
 	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73,
 	0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x07, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73,
 	0x12, 0x14, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x91, 0x01, 0x0a, 0x13, 0x41, 0x64, 0x64, 0x53, 0x65,
+	0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x22, 0xc1, 0x01, 0x0a, 0x13, 0x41, 0x64, 0x64, 0x53, 0x65,
 	0x63, 0x72, 0x65, 0x74, 0x56, 0x61, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x18,
 	0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
 	0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74, 0x12, 0x1c, 0x0a, 0x09, 0x77, 0x6f, 0x72, 0x6b,
 	0x73, 0x70, 0x61, 0x63, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x77, 0x6f, 0x72,
-	0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x1f, 0x0a, 0x0b, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74,
-	0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x73, 0x65, 0x63,
-	0x72, 0x65, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x21, 0x0a, 0x0c, 0x73, 0x65, 0x63, 0x72, 0x65,
-	0x74, 0x5f, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x73,
-	0x65, 0x63, 0x72, 0x65, 0x74, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x46, 0x0a, 0x14, 0x41, 0x64,
+	0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x3e, 0x0a, 0x07, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74,
+	0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x24, 0x2e, 0x65, 0x78, 0x65, 0x63, 0x75, 0x74,
+	0x6f, 0x72, 0x2e, 0x41, 0x64, 0x64, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x56, 0x61, 0x72, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x52, 0x07, 0x73,
+	0x65, 0x63, 0x72, 0x65, 0x74, 0x73, 0x1a, 0x32, 0x0a, 0x06, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74,
+	0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04,
+	0x6e, 0x61, 0x6d, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x46, 0x0a, 0x14, 0x41, 0x64,
 	0x64, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x56, 0x61, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
 	0x73, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x18, 0x01, 0x20,
 	0x01, 0x28, 0x08, 0x52, 0x07, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x12, 0x14, 0x0a, 0x05,
@@ -2124,7 +2218,7 @@ func file_api_proto_executor_proto_rawDescGZIP() []byte {
 	return file_api_proto_executor_proto_rawDescData
 }
 
-var file_api_proto_executor_proto_msgTypes = make([]protoimpl.MessageInfo, 33)
+var file_api_proto_executor_proto_msgTypes = make([]protoimpl.MessageInfo, 35)
 var file_api_proto_executor_proto_goTypes = []any{
 	(*AppendCodeRequest)(nil),            // 0: executor.AppendCodeRequest
 	(*AppendCodeResponse)(nil),           // 1: executor.AppendCodeResponse
@@ -2159,46 +2253,50 @@ var file_api_proto_executor_proto_goTypes = []any{
 	(*ClearSecretVarsRequest)(nil),       // 30: executor.ClearSecretVarsRequest
 	(*ClearSecretVarsResponse)(nil),      // 31: executor.ClearSecretVarsResponse
 	(*AddProvidersRequest_Provider)(nil), // 32: executor.AddProvidersRequest.Provider
+	(*AddSecretEnvRequest_Secret)(nil),   // 33: executor.AddSecretEnvRequest.Secret
+	(*AddSecretVarRequest_Secret)(nil),   // 34: executor.AddSecretVarRequest.Secret
 }
 var file_api_proto_executor_proto_depIdxs = []int32{
 	32, // 0: executor.AddProvidersRequest.providers:type_name -> executor.AddProvidersRequest.Provider
-	0,  // 1: executor.Executor.AppendCode:input_type -> executor.AppendCodeRequest
-	2,  // 2: executor.Executor.Plan:input_type -> executor.PlanRequest
-	4,  // 3: executor.Executor.Apply:input_type -> executor.ApplyRequest
-	6,  // 4: executor.Executor.Destroy:input_type -> executor.DestroyRequest
-	8,  // 5: executor.Executor.GetStateList:input_type -> executor.GetStateListRequest
-	10, // 6: executor.Executor.ClearCode:input_type -> executor.ClearCodeRequest
-	12, // 7: executor.Executor.CreateContext:input_type -> executor.CreateContextRequest
-	14, // 8: executor.Executor.DeleteContext:input_type -> executor.DeleteContextRequest
-	16, // 9: executor.Executor.CreateWorkspace:input_type -> executor.CreateWorkspaceRequest
-	18, // 10: executor.Executor.DeleteWorkspace:input_type -> executor.DeleteWorkspaceRequest
-	20, // 11: executor.Executor.AddProviders:input_type -> executor.AddProvidersRequest
-	26, // 12: executor.Executor.AddSecretEnv:input_type -> executor.AddSecretEnvRequest
-	28, // 13: executor.Executor.AddSecretVar:input_type -> executor.AddSecretVarRequest
-	22, // 14: executor.Executor.ClearProviders:input_type -> executor.ClearProvidersRequest
-	24, // 15: executor.Executor.ClearWorkspace:input_type -> executor.ClearWorkspaceRequest
-	30, // 16: executor.Executor.ClearSecretVars:input_type -> executor.ClearSecretVarsRequest
-	1,  // 17: executor.Executor.AppendCode:output_type -> executor.AppendCodeResponse
-	3,  // 18: executor.Executor.Plan:output_type -> executor.PlanResponse
-	5,  // 19: executor.Executor.Apply:output_type -> executor.ApplyResponse
-	7,  // 20: executor.Executor.Destroy:output_type -> executor.DestroyResponse
-	9,  // 21: executor.Executor.GetStateList:output_type -> executor.GetStateListResponse
-	11, // 22: executor.Executor.ClearCode:output_type -> executor.ClearCodeResponse
-	13, // 23: executor.Executor.CreateContext:output_type -> executor.CreateContextResponse
-	15, // 24: executor.Executor.DeleteContext:output_type -> executor.DeleteContextResponse
-	17, // 25: executor.Executor.CreateWorkspace:output_type -> executor.CreateWorkspaceResponse
-	19, // 26: executor.Executor.DeleteWorkspace:output_type -> executor.DeleteWorkspaceResponse
-	21, // 27: executor.Executor.AddProviders:output_type -> executor.AddProvidersResponse
-	27, // 28: executor.Executor.AddSecretEnv:output_type -> executor.AddSecretEnvResponse
-	29, // 29: executor.Executor.AddSecretVar:output_type -> executor.AddSecretVarResponse
-	23, // 30: executor.Executor.ClearProviders:output_type -> executor.ClearProvidersResponse
-	25, // 31: executor.Executor.ClearWorkspace:output_type -> executor.ClearWorkspaceResponse
-	31, // 32: executor.Executor.ClearSecretVars:output_type -> executor.ClearSecretVarsResponse
-	17, // [17:33] is the sub-list for method output_type
-	1,  // [1:17] is the sub-list for method input_type
-	1,  // [1:1] is the sub-list for extension type_name
-	1,  // [1:1] is the sub-list for extension extendee
-	0,  // [0:1] is the sub-list for field type_name
+	33, // 1: executor.AddSecretEnvRequest.secrets:type_name -> executor.AddSecretEnvRequest.Secret
+	34, // 2: executor.AddSecretVarRequest.secrets:type_name -> executor.AddSecretVarRequest.Secret
+	0,  // 3: executor.Executor.AppendCode:input_type -> executor.AppendCodeRequest
+	2,  // 4: executor.Executor.Plan:input_type -> executor.PlanRequest
+	4,  // 5: executor.Executor.Apply:input_type -> executor.ApplyRequest
+	6,  // 6: executor.Executor.Destroy:input_type -> executor.DestroyRequest
+	8,  // 7: executor.Executor.GetStateList:input_type -> executor.GetStateListRequest
+	10, // 8: executor.Executor.ClearCode:input_type -> executor.ClearCodeRequest
+	12, // 9: executor.Executor.CreateContext:input_type -> executor.CreateContextRequest
+	14, // 10: executor.Executor.DeleteContext:input_type -> executor.DeleteContextRequest
+	16, // 11: executor.Executor.CreateWorkspace:input_type -> executor.CreateWorkspaceRequest
+	18, // 12: executor.Executor.DeleteWorkspace:input_type -> executor.DeleteWorkspaceRequest
+	20, // 13: executor.Executor.AddProviders:input_type -> executor.AddProvidersRequest
+	26, // 14: executor.Executor.AddSecretEnv:input_type -> executor.AddSecretEnvRequest
+	28, // 15: executor.Executor.AddSecretVar:input_type -> executor.AddSecretVarRequest
+	22, // 16: executor.Executor.ClearProviders:input_type -> executor.ClearProvidersRequest
+	24, // 17: executor.Executor.ClearWorkspace:input_type -> executor.ClearWorkspaceRequest
+	30, // 18: executor.Executor.ClearSecretVars:input_type -> executor.ClearSecretVarsRequest
+	1,  // 19: executor.Executor.AppendCode:output_type -> executor.AppendCodeResponse
+	3,  // 20: executor.Executor.Plan:output_type -> executor.PlanResponse
+	5,  // 21: executor.Executor.Apply:output_type -> executor.ApplyResponse
+	7,  // 22: executor.Executor.Destroy:output_type -> executor.DestroyResponse
+	9,  // 23: executor.Executor.GetStateList:output_type -> executor.GetStateListResponse
+	11, // 24: executor.Executor.ClearCode:output_type -> executor.ClearCodeResponse
+	13, // 25: executor.Executor.CreateContext:output_type -> executor.CreateContextResponse
+	15, // 26: executor.Executor.DeleteContext:output_type -> executor.DeleteContextResponse
+	17, // 27: executor.Executor.CreateWorkspace:output_type -> executor.CreateWorkspaceResponse
+	19, // 28: executor.Executor.DeleteWorkspace:output_type -> executor.DeleteWorkspaceResponse
+	21, // 29: executor.Executor.AddProviders:output_type -> executor.AddProvidersResponse
+	27, // 30: executor.Executor.AddSecretEnv:output_type -> executor.AddSecretEnvResponse
+	29, // 31: executor.Executor.AddSecretVar:output_type -> executor.AddSecretVarResponse
+	23, // 32: executor.Executor.ClearProviders:output_type -> executor.ClearProvidersResponse
+	25, // 33: executor.Executor.ClearWorkspace:output_type -> executor.ClearWorkspaceResponse
+	31, // 34: executor.Executor.ClearSecretVars:output_type -> executor.ClearSecretVarsResponse
+	19, // [19:35] is the sub-list for method output_type
+	3,  // [3:19] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_executor_proto_init() }
@@ -2212,7 +2310,7 @@ func file_api_proto_executor_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_api_proto_executor_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   33,
+			NumMessages:   35,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
