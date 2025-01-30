@@ -147,6 +147,69 @@ message AddProvidersResponse {
   string error = 2;     // Error message, if any
 }
 
+// Request to clear providers from the Terraform configuration
+message ClearProvidersRequest {
+  string context = 1; // Name of the context
+  string workspace = 2; // Name of the workspace
+}
+
+// Response to clear providers from the Terraform configuration
+message ClearProvidersResponse {
+  bool success = 1;     // Whether the provider clear operation was successful
+  string error = 2;     // Error message, if any
+}
+
+// Request to clear workspace
+message ClearWorkspaceRequest {
+  string context = 1; // Name of the context
+  string workspace = 2; // Name of the workspace
+}
+
+// Response to clear workspace
+message ClearWorkspaceResponse {
+  bool success = 1;     // Whether the workspace clear operation was successful
+  string error = 2;     // Error message, if any
+}
+
+// Request to add a secret env to the Terraform configuration
+message AddSecretEnvRequest {
+  string context = 1; // Name of the context
+  string workspace = 2; // Name of the workspace
+  string secret_name = 3; // Secret to add
+  string secret_value = 4; // Value of the secret
+}
+
+// Response to add a secret to the Terraform configuration
+message AddSecretEnvResponse {
+  bool success = 1;     // Whether the secret addition was successful
+  string error = 2;     // Error message, if any
+}
+
+// Request to add a secret variable to the Terraform configuration
+message AddSecretVarRequest {
+  string context = 1; // Name of the context
+  string workspace = 2; // Name of the workspace
+  string secret_name = 3; // Secret to add
+  string secret_value = 4; // Value of the secret
+}
+
+// Response to add a secret to the Terraform configuration
+message AddSecretVarResponse {
+  bool success = 1;     // Whether the secret addition was successful
+  string error = 2;     // Error message, if any
+}
+
+// Request to clear seret vars from the Terraform configuration
+message ClearSecretVarsRequest {
+  string context = 1; // Name of the context
+  string workspace = 2; // Name of the workspace
+}
+
+// Response to clear secret vars from the Terraform configuration
+message ClearSecretVarsResponse {
+  bool success = 1;     // Whether the secret vars clear operation was successful
+  string error = 2;     // Error message, if any
+}
 
 // The Executor service definition.
 service Executor {
@@ -182,4 +245,19 @@ service Executor {
 
   // Adds providers to the Terraform configuration.
   rpc AddProviders(AddProvidersRequest) returns (AddProvidersResponse);
+
+  // Adds a secret env to the Terraform configuration.
+  rpc AddSecretEnv(AddSecretEnvRequest) returns (AddSecretEnvResponse);
+
+  // Adds a secret variable to the Terraform configuration.
+  rpc AddSecretVar(AddSecretVarRequest) returns (AddSecretVarResponse);
+
+  // Clears the providers from the Terraform configuration.
+  rpc ClearProviders(ClearProvidersRequest) returns (ClearProvidersResponse);
+
+  // Clears the workspace.
+  rpc ClearWorkspace(ClearWorkspaceRequest) returns (ClearWorkspaceResponse);
+
+  // Clears the secret vars from the Terraform configuration.
+  rpc ClearSecretVars(ClearSecretVarsRequest) returns (ClearSecretVarsResponse);
 }
