@@ -330,6 +330,35 @@ func (s *ExecutorService) ClearWorkspace(ctx context.Context, req *pb.ClearWorks
 	return &pb.ClearWorkspaceResponse{Success: true}, nil
 }
 
+// GetMainTf returns the content of main.tf file
+func (s *ExecutorService) GetMainTf(ctx context.Context, req *pb.GetMainTfRequest) (*pb.GetMainTfResponse, error) {
+	contextDir := filepath.Join("./data/", req.Context)
+	workspaceDir := filepath.Join(contextDir, "/", req.Workspace)
+	mainTfPath := filepath.Join(workspaceDir, "main.tf")
+
+	// Check if file exists
+	if _, err := os.Stat(mainTfPath); os.IsNotExist(err) {
+		return &pb.GetMainTfResponse{
+			Success: false,
+			Error:   "main.tf file does not exist",
+		}, nil
+	}
+
+	// Read file content
+	content, err := os.ReadFile(mainTfPath)
+	if err != nil {
+		return &pb.GetMainTfResponse{
+			Success: false,
+			Error:   fmt.Sprintf("failed to read main.tf: %v", err),
+		}, nil
+	}
+
+	return &pb.GetMainTfResponse{
+		Success: true,
+		Content: string(content),
+	}, nil
+}
+
 // clear main.tf file
 func clearMainTf(workspaceDir string) error {
 	mainTfPath := filepath.Join(workspaceDir, "main.tf")

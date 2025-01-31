@@ -35,6 +35,7 @@ const (
 	Executor_ClearProviders_FullMethodName  = "/executor.Executor/ClearProviders"
 	Executor_ClearWorkspace_FullMethodName  = "/executor.Executor/ClearWorkspace"
 	Executor_ClearSecretVars_FullMethodName = "/executor.Executor/ClearSecretVars"
+	Executor_GetMainTf_FullMethodName       = "/executor.Executor/GetMainTf"
 )
 
 // ExecutorClient is the client API for Executor service.
@@ -75,6 +76,8 @@ type ExecutorClient interface {
 	ClearWorkspace(ctx context.Context, in *ClearWorkspaceRequest, opts ...grpc.CallOption) (*ClearWorkspaceResponse, error)
 	// Clears the secret vars from the Terraform configuration.
 	ClearSecretVars(ctx context.Context, in *ClearSecretVarsRequest, opts ...grpc.CallOption) (*ClearSecretVarsResponse, error)
+	// Gets the content of main.tf file
+	GetMainTf(ctx context.Context, in *GetMainTfRequest, opts ...grpc.CallOption) (*GetMainTfResponse, error)
 }
 
 type executorClient struct {
@@ -245,6 +248,16 @@ func (c *executorClient) ClearSecretVars(ctx context.Context, in *ClearSecretVar
 	return out, nil
 }
 
+func (c *executorClient) GetMainTf(ctx context.Context, in *GetMainTfRequest, opts ...grpc.CallOption) (*GetMainTfResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMainTfResponse)
+	err := c.cc.Invoke(ctx, Executor_GetMainTf_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ExecutorServer is the server API for Executor service.
 // All implementations must embed UnimplementedExecutorServer
 // for forward compatibility.
@@ -283,6 +296,8 @@ type ExecutorServer interface {
 	ClearWorkspace(context.Context, *ClearWorkspaceRequest) (*ClearWorkspaceResponse, error)
 	// Clears the secret vars from the Terraform configuration.
 	ClearSecretVars(context.Context, *ClearSecretVarsRequest) (*ClearSecretVarsResponse, error)
+	// Gets the content of main.tf file
+	GetMainTf(context.Context, *GetMainTfRequest) (*GetMainTfResponse, error)
 	mustEmbedUnimplementedExecutorServer()
 }
 
@@ -340,6 +355,9 @@ func (UnimplementedExecutorServer) ClearWorkspace(context.Context, *ClearWorkspa
 }
 func (UnimplementedExecutorServer) ClearSecretVars(context.Context, *ClearSecretVarsRequest) (*ClearSecretVarsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ClearSecretVars not implemented")
+}
+func (UnimplementedExecutorServer) GetMainTf(context.Context, *GetMainTfRequest) (*GetMainTfResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMainTf not implemented")
 }
 func (UnimplementedExecutorServer) mustEmbedUnimplementedExecutorServer() {}
 func (UnimplementedExecutorServer) testEmbeddedByValue()                  {}
@@ -650,6 +668,24 @@ func _Executor_ClearSecretVars_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Executor_GetMainTf_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMainTfRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExecutorServer).GetMainTf(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Executor_GetMainTf_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExecutorServer).GetMainTf(ctx, req.(*GetMainTfRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Executor_ServiceDesc is the grpc.ServiceDesc for Executor service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -720,6 +756,10 @@ var Executor_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ClearSecretVars",
 			Handler:    _Executor_ClearSecretVars_Handler,
+		},
+		{
+			MethodName: "GetMainTf",
+			Handler:    _Executor_GetMainTf_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

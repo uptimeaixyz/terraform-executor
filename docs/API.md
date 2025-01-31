@@ -18,6 +18,7 @@
     - [AddSecretVar](#addsecretvar)
     - [ClearSecretVars](#clearsecretvars)
     - [ClearWorkspace](#clearworkspace)
+    - [GetMainTf](#getmaintf)
 
 ## Executor Service
 
@@ -401,4 +402,26 @@ grpcurl -plaintext -d '{
     "context": "dev",
     "workspace": "project-a"
 }' localhost:50051 executor.Executor/ClearWorkspace
+```
+
+### GetMainTf
+
+Gets the content of the main.tf file.
+
+**Request:** `GetMainTfRequest`
+- `string context`: Name of the context
+- `string workspace`: Name of the workspace
+
+**Response:** `GetMainTfResponse`
+- `bool success`: Whether the operation was successful
+- `string content`: Content of the main.tf file
+- `string error`: Error message, if any
+
+**Example:**
+```bash
+# Get the content of the main.tf file
+grpcurl -plaintext -d '{
+    "context": "dev",
+    "workspace": "project-a"
+}' localhost:50051 executor.Executor/GetMainTf
 ```

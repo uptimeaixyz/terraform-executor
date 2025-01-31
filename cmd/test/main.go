@@ -74,6 +74,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Test getting main.tf content
+	if err := getMainTfContent(ctx, svc, contextName, workspaceName); err != nil {
+		log.Fatal(err)
+	}
+
 	// Test plan
 	if err := planInfrastructure(ctx, svc, contextName, workspaceName); err != nil {
 		log.Fatal(err)
@@ -222,10 +227,10 @@ func planInfrastructure(ctx context.Context, svc *executor.ExecutorService, cont
 	if err != nil {
 		return fmt.Errorf("failed to plan: %v", err)
 	}
-	fmt.Printf("Plan output:\n%s\n", resp.PlanOutput)
 	if !resp.Success {
 		return fmt.Errorf("plan failed: %s", resp.Error)
 	}
+	fmt.Printf("Plan output:\n%s\n", resp.PlanOutput)
 	return nil
 }
 
@@ -259,5 +264,21 @@ func clearWorkspace(ctx context.Context, svc *executor.ExecutorService, contextN
 		return fmt.Errorf("workspace clear failed: %s", resp.Error)
 	}
 	fmt.Println("Workspace cleared successfully")
+	return nil
+}
+
+// getMainTfContent gets the content of main.tf file
+func getMainTfContent(ctx context.Context, svc *executor.ExecutorService, contextName, workspaceName string) error {
+	resp, err := svc.GetMainTf(ctx, &pb.GetMainTfRequest{
+		Context:   contextName,
+		Workspace: workspaceName,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to get main.tf content: %v", err)
+	}
+	if !resp.Success {
+		return fmt.Errorf("getting main.tf content failed: %s", resp.Error)
+	}
+	fmt.Printf("main.tf content:\n%s\n", resp.Content)
 	return nil
 }

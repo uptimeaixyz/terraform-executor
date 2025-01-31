@@ -219,6 +219,19 @@ message ClearSecretVarsResponse {
   string error = 2;     // Error message, if any
 }
 
+// Request to get main.tf content
+message GetMainTfRequest {
+  string context = 1;   // Name of the context
+  string workspace = 2; // Name of the workspace
+}
+
+// Response with main.tf content
+message GetMainTfResponse {
+  bool success = 1;        // Whether the operation was successful
+  string content = 2;      // Content of main.tf
+  string error = 3;        // Error message, if any
+}
+
 // The Executor service definition.
 service Executor {
   // Appends code to the Terraform configuration.
@@ -268,4 +281,7 @@ service Executor {
 
   // Clears the secret vars from the Terraform configuration.
   rpc ClearSecretVars(ClearSecretVarsRequest) returns (ClearSecretVarsResponse);
+
+  // Gets the content of main.tf file
+  rpc GetMainTf(GetMainTfRequest) returns (GetMainTfResponse);
 }
