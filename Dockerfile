@@ -6,7 +6,7 @@ RUN go mod download
 RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/server
 
 # Final stage
-FROM hashicorp/terraform:1.10
+FROM alpine:3.12
 WORKDIR /app
 COPY --from=builder /app/main .
 RUN chmod +x /app/main

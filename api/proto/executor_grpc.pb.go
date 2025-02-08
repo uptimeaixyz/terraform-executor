@@ -30,11 +30,12 @@ const (
 	Executor_CreateWorkspace_FullMethodName = "/executor.Executor/CreateWorkspace"
 	Executor_DeleteWorkspace_FullMethodName = "/executor.Executor/DeleteWorkspace"
 	Executor_AddProviders_FullMethodName    = "/executor.Executor/AddProviders"
-	Executor_AddSecretEnv_FullMethodName    = "/executor.Executor/AddSecretEnv"
-	Executor_AddSecretVar_FullMethodName    = "/executor.Executor/AddSecretVar"
 	Executor_ClearProviders_FullMethodName  = "/executor.Executor/ClearProviders"
-	Executor_ClearWorkspace_FullMethodName  = "/executor.Executor/ClearWorkspace"
+	Executor_AddSecretEnv_FullMethodName    = "/executor.Executor/AddSecretEnv"
+	Executor_ClearSecretEnv_FullMethodName  = "/executor.Executor/ClearSecretEnv"
+	Executor_AddSecretVar_FullMethodName    = "/executor.Executor/AddSecretVar"
 	Executor_ClearSecretVars_FullMethodName = "/executor.Executor/ClearSecretVars"
+	Executor_ClearWorkspace_FullMethodName  = "/executor.Executor/ClearWorkspace"
 	Executor_GetMainTf_FullMethodName       = "/executor.Executor/GetMainTf"
 )
 
@@ -66,16 +67,18 @@ type ExecutorClient interface {
 	DeleteWorkspace(ctx context.Context, in *DeleteWorkspaceRequest, opts ...grpc.CallOption) (*DeleteWorkspaceResponse, error)
 	// Adds providers to the Terraform configuration.
 	AddProviders(ctx context.Context, in *AddProvidersRequest, opts ...grpc.CallOption) (*AddProvidersResponse, error)
-	// Adds a secret env to the Terraform configuration.
-	AddSecretEnv(ctx context.Context, in *AddSecretEnvRequest, opts ...grpc.CallOption) (*AddSecretEnvResponse, error)
-	// Adds a secret variable to the Terraform configuration.
-	AddSecretVar(ctx context.Context, in *AddSecretVarRequest, opts ...grpc.CallOption) (*AddSecretVarResponse, error)
 	// Clears the providers from the Terraform configuration.
 	ClearProviders(ctx context.Context, in *ClearProvidersRequest, opts ...grpc.CallOption) (*ClearProvidersResponse, error)
-	// Clears the workspace.
-	ClearWorkspace(ctx context.Context, in *ClearWorkspaceRequest, opts ...grpc.CallOption) (*ClearWorkspaceResponse, error)
+	// Adds a secret env to the Terraform configuration.
+	AddSecretEnv(ctx context.Context, in *AddSecretEnvRequest, opts ...grpc.CallOption) (*AddSecretEnvResponse, error)
+	// Clears the secret env vars from the Terraform configuration.
+	ClearSecretEnv(ctx context.Context, in *ClearSecretEnvRequest, opts ...grpc.CallOption) (*ClearSecretEnvResponse, error)
+	// Adds a secret variable to the Terraform configuration.
+	AddSecretVar(ctx context.Context, in *AddSecretVarRequest, opts ...grpc.CallOption) (*AddSecretVarResponse, error)
 	// Clears the secret vars from the Terraform configuration.
 	ClearSecretVars(ctx context.Context, in *ClearSecretVarsRequest, opts ...grpc.CallOption) (*ClearSecretVarsResponse, error)
+	// Clears the workspace.
+	ClearWorkspace(ctx context.Context, in *ClearWorkspaceRequest, opts ...grpc.CallOption) (*ClearWorkspaceResponse, error)
 	// Gets the content of main.tf file
 	GetMainTf(ctx context.Context, in *GetMainTfRequest, opts ...grpc.CallOption) (*GetMainTfResponse, error)
 }
@@ -198,10 +201,30 @@ func (c *executorClient) AddProviders(ctx context.Context, in *AddProvidersReque
 	return out, nil
 }
 
+func (c *executorClient) ClearProviders(ctx context.Context, in *ClearProvidersRequest, opts ...grpc.CallOption) (*ClearProvidersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ClearProvidersResponse)
+	err := c.cc.Invoke(ctx, Executor_ClearProviders_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *executorClient) AddSecretEnv(ctx context.Context, in *AddSecretEnvRequest, opts ...grpc.CallOption) (*AddSecretEnvResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(AddSecretEnvResponse)
 	err := c.cc.Invoke(ctx, Executor_AddSecretEnv_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *executorClient) ClearSecretEnv(ctx context.Context, in *ClearSecretEnvRequest, opts ...grpc.CallOption) (*ClearSecretEnvResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ClearSecretEnvResponse)
+	err := c.cc.Invoke(ctx, Executor_ClearSecretEnv_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -218,10 +241,10 @@ func (c *executorClient) AddSecretVar(ctx context.Context, in *AddSecretVarReque
 	return out, nil
 }
 
-func (c *executorClient) ClearProviders(ctx context.Context, in *ClearProvidersRequest, opts ...grpc.CallOption) (*ClearProvidersResponse, error) {
+func (c *executorClient) ClearSecretVars(ctx context.Context, in *ClearSecretVarsRequest, opts ...grpc.CallOption) (*ClearSecretVarsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ClearProvidersResponse)
-	err := c.cc.Invoke(ctx, Executor_ClearProviders_FullMethodName, in, out, cOpts...)
+	out := new(ClearSecretVarsResponse)
+	err := c.cc.Invoke(ctx, Executor_ClearSecretVars_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -232,16 +255,6 @@ func (c *executorClient) ClearWorkspace(ctx context.Context, in *ClearWorkspaceR
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ClearWorkspaceResponse)
 	err := c.cc.Invoke(ctx, Executor_ClearWorkspace_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *executorClient) ClearSecretVars(ctx context.Context, in *ClearSecretVarsRequest, opts ...grpc.CallOption) (*ClearSecretVarsResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ClearSecretVarsResponse)
-	err := c.cc.Invoke(ctx, Executor_ClearSecretVars_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -286,16 +299,18 @@ type ExecutorServer interface {
 	DeleteWorkspace(context.Context, *DeleteWorkspaceRequest) (*DeleteWorkspaceResponse, error)
 	// Adds providers to the Terraform configuration.
 	AddProviders(context.Context, *AddProvidersRequest) (*AddProvidersResponse, error)
-	// Adds a secret env to the Terraform configuration.
-	AddSecretEnv(context.Context, *AddSecretEnvRequest) (*AddSecretEnvResponse, error)
-	// Adds a secret variable to the Terraform configuration.
-	AddSecretVar(context.Context, *AddSecretVarRequest) (*AddSecretVarResponse, error)
 	// Clears the providers from the Terraform configuration.
 	ClearProviders(context.Context, *ClearProvidersRequest) (*ClearProvidersResponse, error)
-	// Clears the workspace.
-	ClearWorkspace(context.Context, *ClearWorkspaceRequest) (*ClearWorkspaceResponse, error)
+	// Adds a secret env to the Terraform configuration.
+	AddSecretEnv(context.Context, *AddSecretEnvRequest) (*AddSecretEnvResponse, error)
+	// Clears the secret env vars from the Terraform configuration.
+	ClearSecretEnv(context.Context, *ClearSecretEnvRequest) (*ClearSecretEnvResponse, error)
+	// Adds a secret variable to the Terraform configuration.
+	AddSecretVar(context.Context, *AddSecretVarRequest) (*AddSecretVarResponse, error)
 	// Clears the secret vars from the Terraform configuration.
 	ClearSecretVars(context.Context, *ClearSecretVarsRequest) (*ClearSecretVarsResponse, error)
+	// Clears the workspace.
+	ClearWorkspace(context.Context, *ClearWorkspaceRequest) (*ClearWorkspaceResponse, error)
 	// Gets the content of main.tf file
 	GetMainTf(context.Context, *GetMainTfRequest) (*GetMainTfResponse, error)
 	mustEmbedUnimplementedExecutorServer()
@@ -341,20 +356,23 @@ func (UnimplementedExecutorServer) DeleteWorkspace(context.Context, *DeleteWorks
 func (UnimplementedExecutorServer) AddProviders(context.Context, *AddProvidersRequest) (*AddProvidersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddProviders not implemented")
 }
+func (UnimplementedExecutorServer) ClearProviders(context.Context, *ClearProvidersRequest) (*ClearProvidersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ClearProviders not implemented")
+}
 func (UnimplementedExecutorServer) AddSecretEnv(context.Context, *AddSecretEnvRequest) (*AddSecretEnvResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddSecretEnv not implemented")
+}
+func (UnimplementedExecutorServer) ClearSecretEnv(context.Context, *ClearSecretEnvRequest) (*ClearSecretEnvResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ClearSecretEnv not implemented")
 }
 func (UnimplementedExecutorServer) AddSecretVar(context.Context, *AddSecretVarRequest) (*AddSecretVarResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddSecretVar not implemented")
 }
-func (UnimplementedExecutorServer) ClearProviders(context.Context, *ClearProvidersRequest) (*ClearProvidersResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ClearProviders not implemented")
+func (UnimplementedExecutorServer) ClearSecretVars(context.Context, *ClearSecretVarsRequest) (*ClearSecretVarsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ClearSecretVars not implemented")
 }
 func (UnimplementedExecutorServer) ClearWorkspace(context.Context, *ClearWorkspaceRequest) (*ClearWorkspaceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ClearWorkspace not implemented")
-}
-func (UnimplementedExecutorServer) ClearSecretVars(context.Context, *ClearSecretVarsRequest) (*ClearSecretVarsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ClearSecretVars not implemented")
 }
 func (UnimplementedExecutorServer) GetMainTf(context.Context, *GetMainTfRequest) (*GetMainTfResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMainTf not implemented")
@@ -578,6 +596,24 @@ func _Executor_AddProviders_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Executor_ClearProviders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ClearProvidersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExecutorServer).ClearProviders(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Executor_ClearProviders_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExecutorServer).ClearProviders(ctx, req.(*ClearProvidersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Executor_AddSecretEnv_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AddSecretEnvRequest)
 	if err := dec(in); err != nil {
@@ -592,6 +628,24 @@ func _Executor_AddSecretEnv_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ExecutorServer).AddSecretEnv(ctx, req.(*AddSecretEnvRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Executor_ClearSecretEnv_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ClearSecretEnvRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExecutorServer).ClearSecretEnv(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Executor_ClearSecretEnv_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExecutorServer).ClearSecretEnv(ctx, req.(*ClearSecretEnvRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -614,20 +668,20 @@ func _Executor_AddSecretVar_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Executor_ClearProviders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ClearProvidersRequest)
+func _Executor_ClearSecretVars_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ClearSecretVarsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ExecutorServer).ClearProviders(ctx, in)
+		return srv.(ExecutorServer).ClearSecretVars(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Executor_ClearProviders_FullMethodName,
+		FullMethod: Executor_ClearSecretVars_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ExecutorServer).ClearProviders(ctx, req.(*ClearProvidersRequest))
+		return srv.(ExecutorServer).ClearSecretVars(ctx, req.(*ClearSecretVarsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -646,24 +700,6 @@ func _Executor_ClearWorkspace_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ExecutorServer).ClearWorkspace(ctx, req.(*ClearWorkspaceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Executor_ClearSecretVars_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ClearSecretVarsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ExecutorServer).ClearSecretVars(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Executor_ClearSecretVars_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ExecutorServer).ClearSecretVars(ctx, req.(*ClearSecretVarsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -738,24 +774,28 @@ var Executor_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Executor_AddProviders_Handler,
 		},
 		{
+			MethodName: "ClearProviders",
+			Handler:    _Executor_ClearProviders_Handler,
+		},
+		{
 			MethodName: "AddSecretEnv",
 			Handler:    _Executor_AddSecretEnv_Handler,
+		},
+		{
+			MethodName: "ClearSecretEnv",
+			Handler:    _Executor_ClearSecretEnv_Handler,
 		},
 		{
 			MethodName: "AddSecretVar",
 			Handler:    _Executor_AddSecretVar_Handler,
 		},
 		{
-			MethodName: "ClearProviders",
-			Handler:    _Executor_ClearProviders_Handler,
+			MethodName: "ClearSecretVars",
+			Handler:    _Executor_ClearSecretVars_Handler,
 		},
 		{
 			MethodName: "ClearWorkspace",
 			Handler:    _Executor_ClearWorkspace_Handler,
-		},
-		{
-			MethodName: "ClearSecretVars",
-			Handler:    _Executor_ClearSecretVars_Handler,
 		},
 		{
 			MethodName: "GetMainTf",
