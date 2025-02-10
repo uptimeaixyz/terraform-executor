@@ -164,7 +164,7 @@ Applies the Terraform plan and returns the execution result.
 # Apply the Terraform configuration
 grpcurl -plaintext -d '{
     "user_id": "user123",
-    "project": "project-a",
+    "project": "project-a"
 }' localhost:50051 executor.Executor/Apply
 ```
 
@@ -186,7 +186,7 @@ Destroys the Terraform-managed infrastructure and returns the result.
 # Destroy the Terraform-managed infrastructure
 grpcurl -plaintext -d '{
     "user_id": "user123",
-    "project": "project-a",
+    "project": "project-a"
 }' localhost:50051 executor.Executor/Destroy
 ```
 
@@ -208,7 +208,7 @@ Retrieves the Terraform state list.
 # Get the Terraform state list
 grpcurl -plaintext -d '{
     "user_id": "user123",
-    "project": "project-a",
+    "project": "project-a"
 }' localhost:50051 executor.Executor/GetStateList
 ```
 
@@ -229,7 +229,7 @@ Clears the main.tf file.
 # Clear the Terraform configuration
 grpcurl -plaintext -d '{
     "user_id": "user123",
-    "project": "project-a",
+    "project": "project-a"
 }' localhost:50051 executor.Executor/ClearCode
 ```
 
