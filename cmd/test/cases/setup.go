@@ -8,13 +8,13 @@ import (
 	"terraform-executor/internal/executor"
 )
 
-func GetSetupTests(ctx context.Context, svc *executor.ExecutorService, userId, contextName, workspaceName string) []utils.TestCase {
+func GetSetupTests(ctx context.Context, svc *executor.ExecutorService, userId, projectName string) []utils.TestCase {
 	return []utils.TestCase{
 		{
 			Name:     "Verify namespace creation",
 			Category: "Setup",
 			Fn: func() error {
-				exists, err := svc.K8sClient.NamespaceExists(ctx, userId)  // Updated to use ctx
+				exists, err := svc.K8sClient.NamespaceExists(ctx, userId) // Updated to use ctx
 				if err != nil {
 					return fmt.Errorf("failed to check namespace: %v", err)
 				}
@@ -25,15 +25,15 @@ func GetSetupTests(ctx context.Context, svc *executor.ExecutorService, userId, c
 			},
 		},
 		{
-			Name:     "Create context",
+			Name:     "Create Project",
 			Category: "Setup",
 			Fn: func() error {
-				resp, err := svc.CreateContext(ctx, &pb.CreateContextRequest{
+				resp, err := svc.CreateProject(ctx, &pb.CreateProjectRequest{
 					UserId:  userId,
-					Context: contextName,
+					Project: projectName,
 				})
 				if err != nil || !resp.Success {
-					return fmt.Errorf("context creation failed: %v", err)
+					return fmt.Errorf("project creation failed: %v", err)
 				}
 				return nil
 			},

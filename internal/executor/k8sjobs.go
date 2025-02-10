@@ -15,9 +15,9 @@ import (
 )
 
 // Helper function to create Terraform job
-func (s *ExecutorService) createTerraformJobTemplate(ctx context.Context, name, namespace, context, workspace string, runType string, args []string) (*batchv1.Job, error) {
+func (s *ExecutorService) createTerraformJobTemplate(ctx context.Context, name, namespace, project string, runType string, args []string) (*batchv1.Job, error) {
 	// get env vars from secret
-	secretName := fmt.Sprintf("%s.%s.%s", context, workspace, "env")
+	secretName := fmt.Sprintf("%s.%s", project, "env")
 	envVars := []corev1.EnvVar{}
 	if secret, err := s.K8sClient.GetSecret(ctx, namespace, secretName); err == nil {
 		for key, value := range secret.Data {
@@ -53,7 +53,7 @@ func (s *ExecutorService) createTerraformJobTemplate(ctx context.Context, name, 
 	volumeMounts = append(volumeMounts, pluginsVolumeMount, awsCredsMount)
 	for _, vol := range []string{"main.tf", "versions.tf", "variables.tf"} {
 		// add volume mounts for main.tf, versions.tf, and variables.tf if config maps exist
-		if _, err := s.K8sClient.GetConfigMap(ctx, namespace, fmt.Sprintf("%s.%s.%s", context, workspace, vol)); err == nil {
+		if _, err := s.K8sClient.GetConfigMap(ctx, namespace, fmt.Sprintf("%s.%s", project, vol)); err == nil {
 			volumeMounts = append(volumeMounts, corev1.VolumeMount{
 				Name:      strings.TrimSuffix(vol, ".tf"),
 				MountPath: fmt.Sprintf("/root/%s", vol),
@@ -114,13 +114,13 @@ func (s *ExecutorService) createTerraformJobTemplate(ctx context.Context, name, 
 	}
 
 	for _, vol := range []string{"main.tf", "versions.tf", "variables.tf"} {
-		if _, err := s.K8sClient.GetConfigMap(ctx, namespace, fmt.Sprintf("%s.%s.%s", context, workspace, vol)); err == nil {
+		if _, err := s.K8sClient.GetConfigMap(ctx, namespace, fmt.Sprintf("%s.%s", project, vol)); err == nil {
 			volumes = append(volumes, corev1.Volume{
 				Name: strings.TrimSuffix(vol, ".tf"),
 				VolumeSource: corev1.VolumeSource{
 					ConfigMap: &corev1.ConfigMapVolumeSource{
 						LocalObjectReference: corev1.LocalObjectReference{
-							Name: fmt.Sprintf("%s.%s.%s", context, workspace, vol),
+							Name: fmt.Sprintf("%s.%s", project, vol),
 						},
 					},
 				},
@@ -133,11 +133,10 @@ func (s *ExecutorService) createTerraformJobTemplate(ctx context.Context, name, 
 			Name:      name,
 			Namespace: namespace,
 			Labels: map[string]string{
-				"app":       "terraform-executor",
-				"user":      namespace,
-				"context":   context,
-				"workspace": workspace,
-				"type":      runType,
+				"app":     "terraform-executor",
+				"user":    namespace,
+				"project": project,
+				"type":    runType,
 			},
 		},
 		Spec: batchv1.JobSpec{
@@ -147,11 +146,10 @@ func (s *ExecutorService) createTerraformJobTemplate(ctx context.Context, name, 
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"app":       "terraform-executor",
-						"user":      namespace,
-						"context":   context,
-						"workspace": workspace,
-						"type":      runType,
+						"app":     "terraform-executor",
+						"user":    namespace,
+						"project": project,
+						"type":    runType,
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -275,7 +273,7 @@ func (s *ExecutorService) waitForJobAndGetLogs(ctx context.Context, userId, jobN
 	select {
 	case <-done:
 		return result.logs, result.err
-	case <-time.After(2 * time.Minute):
-		return "", fmt.Errorf("job timed out after 2 minutes")
+	case <-time.After(5 * time.Minute):
+		return "", fmt.Errorf("job timed out after 5 minutes")
 	}
 }

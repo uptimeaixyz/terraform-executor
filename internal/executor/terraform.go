@@ -129,7 +129,7 @@ func (s *ExecutorService) Plan(ctx context.Context, req *pb.PlanRequest) (*pb.Pl
 		req.UserId,
 		time.Now().Format("20060102150405"),
 	)
-	job, err := s.createTerraformJobTemplate(ctx, jobName, req.UserId, req.Context, req.Workspace, "plan", []string{"plan", "-input=false", "-no-color"})
+	job, err := s.createTerraformJobTemplate(ctx, jobName, req.UserId, req.Project, "plan", []string{"plan", "-input=false", "-no-color"})
 	if err != nil {
 		if s.Debug {
 			fmt.Printf("Job template that failed:\n%+v\n", job)
@@ -193,7 +193,7 @@ func (s *ExecutorService) Apply(ctx context.Context, req *pb.ApplyRequest) (*pb.
 	}
 
 	jobName := fmt.Sprintf("terraform-apply-%s", time.Now().Format("20060102150405"))
-	job, err := s.createTerraformJobTemplate(ctx, jobName, req.UserId, req.Context, req.Workspace, "apply", []string{"apply", "-auto-approve", "-input=false", "-no-color"})
+	job, err := s.createTerraformJobTemplate(ctx, jobName, req.UserId, req.Project, "apply", []string{"apply", "-auto-approve", "-input=false", "-no-color"})
 	if err != nil {
 		return &pb.ApplyResponse{
 			Success: false,
@@ -247,7 +247,7 @@ func (s *ExecutorService) Destroy(ctx context.Context, req *pb.DestroyRequest) (
 	}
 
 	jobName := fmt.Sprintf("terraform-destroy-%s", time.Now().Format("20060102150405"))
-	job, err := s.createTerraformJobTemplate(ctx, jobName, req.UserId, req.Context, req.Workspace, "destroy", []string{"destroy", "-auto-approve", "-input=false", "-no-color"})
+	job, err := s.createTerraformJobTemplate(ctx, jobName, req.UserId, req.Project, "destroy", []string{"destroy", "-auto-approve", "-input=false", "-no-color"})
 	if err != nil {
 		return &pb.DestroyResponse{Success: false, Error: err.Error()}, nil
 	}
@@ -276,7 +276,7 @@ func (s *ExecutorService) GetStateList(ctx context.Context, req *pb.GetStateList
 	}
 
 	jobName := fmt.Sprintf("terraform-state-list-%s-%s", req.UserId, time.Now().Format("20060102150405"))
-	job, err := s.createTerraformJobTemplate(ctx, jobName, req.UserId, req.Context, req.Workspace, "state-list", []string{"state", "list", "-no-color"})
+	job, err := s.createTerraformJobTemplate(ctx, jobName, req.UserId, req.Project, "state-list", []string{"state", "list", "-no-color"})
 	if err != nil {
 		return &pb.GetStateListResponse{
 			Success: false,

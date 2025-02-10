@@ -9,16 +9,15 @@ import (
 	"terraform-executor/internal/executor"
 )
 
-func GetTerraformTests(ctx context.Context, svc *executor.ExecutorService, userId, contextName, workspaceName string) []utils.TestCase {
+func GetTerraformTests(ctx context.Context, svc *executor.ExecutorService, userId, projectName string) []utils.TestCase {
 	return []utils.TestCase{
 		{
 			Name:     "Plan infrastructure",
 			Category: "Terraform",
 			Fn: func() error {
 				resp, err := svc.Plan(ctx, &pb.PlanRequest{
-					UserId:    userId,
-					Context:   contextName,
-					Workspace: workspaceName,
+					UserId:  userId,
+					Project: projectName,
 				})
 
 				// First check if the RPC call itself failed
@@ -49,9 +48,8 @@ func GetTerraformTests(ctx context.Context, svc *executor.ExecutorService, userI
 			Category: "Terraform",
 			Fn: func() error {
 				resp, err := svc.Apply(ctx, &pb.ApplyRequest{
-					UserId:    userId,
-					Context:   contextName,
-					Workspace: workspaceName,
+					UserId:  userId,
+					Project: projectName,
 				})
 
 				// First check if the RPC call itself failed
@@ -82,9 +80,8 @@ func GetTerraformTests(ctx context.Context, svc *executor.ExecutorService, userI
 			Category: "Terraform",
 			Fn: func() error {
 				resp, err := svc.GetStateList(ctx, &pb.GetStateListRequest{
-					UserId:    userId,
-					Context:   contextName,
-					Workspace: workspaceName,
+					UserId:  userId,
+					Project: projectName,
 				})
 
 				// First check if the RPC call itself failed
@@ -115,9 +112,8 @@ func GetTerraformTests(ctx context.Context, svc *executor.ExecutorService, userI
 			Category: "Terraform",
 			Fn: func() error {
 				resp, err := svc.Destroy(ctx, &pb.DestroyRequest{
-					UserId:    userId,
-					Context:   contextName,
-					Workspace: workspaceName,
+					UserId:  userId,
+					Project: projectName,
 				})
 
 				// First check if the RPC call itself failed

@@ -14,8 +14,7 @@ type ProviderConfig struct {
 type TerraformTemplateData struct {
 	Bucket    string
 	UserID    string
-	Context   string
-	Workspace string
+	Project   string
 	Providers []ProviderConfig
 }
 
@@ -23,7 +22,7 @@ const terraformTemplate = `
 terraform {
     backend "s3" {
         bucket  = "{{ .Bucket }}"
-		key     = "{{ .UserID }}/{{ .Context }}/{{ .Workspace }}/terraform.tfstate"
+		key     = "{{ .UserID }}/{{ .Project }}/terraform.tfstate"
 		region  = "eu-west-3"
 		profile = "tfstate"
     }

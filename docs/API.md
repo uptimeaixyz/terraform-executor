@@ -2,10 +2,8 @@
 
 ## Table of contents
 - [Executor Service](#executor-service)
-    - [CreateContext](#createcontext)
-    - [DeleteContext](#deletecontext)
-    - [CreateWorkspace](#createworkspace)
-    - [DeleteWorkspace](#deleteworkspace)
+    - [CreateProject](#createproject)
+    - [DeleteProject](#deleteproject)
     - [AddProviders](#addproviders)
     - [AppendCode](#appendcode)
     - [Plan](#plan)
@@ -17,91 +15,53 @@
     - [AddSecretEnv](#addsecretenv)
     - [AddSecretVar](#addsecretvar)
     - [ClearSecretVars](#clearsecretvars)
-    - [ClearWorkspace](#clearworkspace)
+    - [ClearSecretEnv](#clearsecretenv)
     - [GetMainTf](#getmaintf)
 
 ## Executor Service
 
-The `Executor` service provides methods to manage Terraform operations such as planning, applying, destroying infrastructure, and managing contexts and workspaces.
+The `Executor` service provides methods to manage Terraform operations such as planning, applying, destroying infrastructure, and managing projects.
 
-### CreateContext
+### CreateProject
 
-Creates a new context.
+Creates a new project.
 
-**Request:** `CreateContextRequest`
-- `string context`: Name of the context
+**Request:** `CreateProjectRequest`
+- `string user_id`: User identifier
+- `string project`: Name of the project
 
-**Response:** `CreateContextResponse`
-- `bool success`: Whether the context creation was successful
+**Response:** `CreateProjectResponse`
+- `bool success`: Whether the project creation was successful
 - `string error`: Error message, if any
 
 **Example:**
 ```bash
-# Create a new context
+# Create a new project
 grpcurl -plaintext -d '{
-    "context": "dev"
-}' localhost:50051 executor.Executor/CreateContext
+    "user_id": "user123",
+    "project": "project-a"
+}' localhost:50051 executor.Executor/CreateProject
 ```
 
-### DeleteContext
+### DeleteProject
 
-Deletes a context.
+Deletes a project.
 
-**Request:** `DeleteContextRequest`
-- `string context`: Name of the context
+**Request:** `DeleteProjectRequest`
+- `string user_id`: User identifier
+- `string project`: Name of the project
 
-**Response:** `DeleteContextResponse`
-- `bool success`: Whether the context deletion was successful
+**Response:** `DeleteProjectResponse`
+- `bool success`: Whether the project deletion was successful
 - `string error`: Error message, if any
 
 **Example:**
 ```bash
-# Delete a context
+# Delete a project
 grpcurl -plaintext -d '{
-    "context": "dev"
-}' localhost:50051 executor.Executor/DeleteContext
-```
-
-### CreateWorkspace
-
-Creates a workspace within a context.
-
-**Request:** `CreateWorkspaceRequest`
-- `string context`: Name of the context
-- `string workspace`: Name of the workspace
-
-**Response:** `CreateWorkspaceResponse`
-- `bool success`: Whether the workspace creation was successful
-- `string error`: Error message, if any
-
-**Example:**
-```bash
-# Create a new workspace
-grpcurl -plaintext -d '{
-    "context": "dev",
-    "workspace": "project-a"
-}' localhost:50051 executor.Executor/CreateWorkspace
-```
-
-### DeleteWorkspace
-
-Deletes a workspace within a context.
-
-**Request:** `DeleteWorkspaceRequest`
-- `string context`: Name of the context
-- `string workspace`: Name of the workspace
-
-**Response:** `DeleteWorkspaceResponse`
-- `bool success`: Whether the workspace deletion was successful
-- `string error`: Error message, if any
-
-**Example:**
-```bash
-# Delete a workspace
-grpcurl -plaintext -d '{
-    "context": "dev",
-    "workspace": "project-a"
-}' localhost:50051 executor.Executor/DeleteWorkspace
+    "user_id": "user123",
+    "project": "project-a"
+}' localhost:50051 executor.Executor/DeleteProject
 ```
 
 ### AddProviders
@@ -109,12 +69,12 @@ grpcurl -plaintext -d '{
 Adds providers to the Terraform configuration.
 
 **Request:** `AddProvidersRequest`
-- `string context`: Name of the context
-- `string workspace`: Name of the workspace
+- `string user_id`: User identifier
+- `string project`: Name of the project
 - `repeated Provider providers`: List of providers to add
-        - `string name`: Name of the provider
-        - `string source`: Source of the provider
-        - `string version`: Version of the provider
+    - `string name`: Name of the provider
+    - `string source`: Source of the provider
+    - `string version`: Version of the provider
 
 **Response:** `AddProvidersResponse`
 - `bool success`: Whether the provider addition was successful
@@ -124,8 +84,8 @@ Adds providers to the Terraform configuration.
 ```bash
 # Add providers to the Terraform configuration
 grpcurl -plaintext -d '{
-    "context": "dev",
-    "workspace": "project-a",
+    "user_id": "user123",
+    "project": "project-a",
     "providers": [
         {
             "name": "aws",
@@ -145,8 +105,8 @@ grpcurl -plaintext -d '{
 Appends code to the configuration file.
 
 **Request:** `AppendCodeRequest`
-- `string context`: Name of the context
-- `string workspace`: Name of the Terraform workspace
+- `string user_id`: User identifier
+- `string project`: Name of the project
 - `string code`: The Terraform configuration code snippet
 
 **Response:** `AppendCodeResponse`
@@ -157,8 +117,8 @@ Appends code to the configuration file.
 ```bash
 # Append code to the Terraform configuration
 grpcurl -plaintext -d '{
-    "context": "dev",
-    "workspace": "project-a",
+    "user_id": "user123",
+    "project": "project-a",
     "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"my-terraform-bucket\"\n  tags = {\n    Environment = \"Dev\"\n  }\n}"
 }' localhost:50051 executor.Executor/AppendCode
 ```
@@ -168,8 +128,8 @@ grpcurl -plaintext -d '{
 Generates a Terraform plan and returns the result.
 
 **Request:** `PlanRequest`
-- `string context`: Name of the context
-- `string workspace`: Name of the Terraform workspace
+- `string user_id`: User identifier
+- `string project`: Name of the project
 
 **Response:** `PlanResponse`
 - `bool success`: Whether the plan generation was successful
@@ -180,8 +140,8 @@ Generates a Terraform plan and returns the result.
 ```bash
 # Run a Terraform plan
 grpcurl -plaintext -d '{
-    "context": "dev",
-    "workspace": "project-a"
+    "user_id": "user123",
+    "project": "project-a"
 }' localhost:50051 executor.Executor/Plan
 ```
 
@@ -190,8 +150,8 @@ grpcurl -plaintext -d '{
 Applies the Terraform plan and returns the execution result.
 
 **Request:** `ApplyRequest`
-- `string context`: Name of the context
-- `string workspace`: Name of the Terraform workspace
+- `string user_id`: User identifier
+- `string project`: Name of the project
 - `string plan_file`: Path to the saved Terraform plan file (optional)
 
 **Response:** `ApplyResponse`
@@ -203,8 +163,8 @@ Applies the Terraform plan and returns the execution result.
 ```bash
 # Apply the Terraform configuration
 grpcurl -plaintext -d '{
-    "context": "dev",
-    "workspace": "project-a",
+    "user_id": "user123",
+    "project": "project-a",
 }' localhost:50051 executor.Executor/Apply
 ```
 
@@ -213,8 +173,8 @@ grpcurl -plaintext -d '{
 Destroys the Terraform-managed infrastructure and returns the result.
 
 **Request:** `DestroyRequest`
-- `string context`: Name of the context
-- `string workspace`: Name of the Terraform workspace
+- `string user_id`: User identifier
+- `string project`: Name of the project
 
 **Response:** `DestroyResponse`
 - `bool success`: Whether the destroy operation was successful
@@ -225,8 +185,8 @@ Destroys the Terraform-managed infrastructure and returns the result.
 ```bash
 # Destroy the Terraform-managed infrastructure
 grpcurl -plaintext -d '{
-    "context": "dev",
-    "workspace": "project-a",
+    "user_id": "user123",
+    "project": "project-a",
 }' localhost:50051 executor.Executor/Destroy
 ```
 
@@ -235,8 +195,8 @@ grpcurl -plaintext -d '{
 Retrieves the Terraform state list.
 
 **Request:** `GetStateListRequest`
-- `string context`: Name of the context
-- `string workspace`: Name of the Terraform workspace
+- `string user_id`: User identifier
+- `string project`: Name of the project
 
 **Response:** `GetStateListResponse`
 - `bool success`: Whether the state list retrieval was successful
@@ -247,8 +207,8 @@ Retrieves the Terraform state list.
 ```bash
 # Get the Terraform state list
 grpcurl -plaintext -d '{
-    "context": "dev",
-    "workspace": "project-a",
+    "user_id": "user123",
+    "project": "project-a",
 }' localhost:50051 executor.Executor/GetStateList
 ```
 
@@ -257,8 +217,8 @@ grpcurl -plaintext -d '{
 Clears the main.tf file.
 
 **Request:** `ClearCodeRequest`
-- `string context`: Name of the context
-- `string workspace`: Name of the Terraform workspace
+- `string user_id`: User identifier
+- `string project`: Name of the project
 
 **Response:** `ClearCodeResponse`
 - `bool success`: Whether the clear operation was successful
@@ -268,8 +228,8 @@ Clears the main.tf file.
 ```bash
 # Clear the Terraform configuration
 grpcurl -plaintext -d '{
-    "context": "dev",
-    "workspace": "project-a",
+    "user_id": "user123",
+    "project": "project-a",
 }' localhost:50051 executor.Executor/ClearCode
 ```
 
@@ -278,8 +238,8 @@ grpcurl -plaintext -d '{
 Clears providers from the Terraform configuration.
 
 **Request:** `ClearProvidersRequest`
-- `string context`: Name of the context
-- `string workspace`: Name of the workspace
+- `string user_id`: User identifier
+- `string project`: Name of the project
 
 **Response:** `ClearProvidersResponse`
 - `bool success`: Whether the provider clear operation was successful
@@ -289,8 +249,8 @@ Clears providers from the Terraform configuration.
 ```bash
 # Clear providers from the Terraform configuration
 grpcurl -plaintext -d '{
-    "context": "dev",
-    "workspace": "project-a"
+    "user_id": "user123",
+    "project": "project-a"
 }' localhost:50051 executor.Executor/ClearProviders
 ```
 
@@ -299,11 +259,11 @@ grpcurl -plaintext -d '{
 Adds secret environment variables to the Terraform configuration.
 
 **Request:** `AddSecretEnvRequest`
-- `string context`: Name of the context
-- `string workspace`: Name of the workspace
+- `string user_id`: User identifier
+- `string project`: Name of the project
 - `repeated SecretEnv secrets`: List of secret environment variables to add
-        - `string key`: Key of the secret environment variable
-        - `string value`: Value of the secret environment variable
+    - `string key`: Key of the secret environment variable
+    - `string value`: Value of the secret environment variable
 
 **Response:** `AddSecretEnvResponse`
 - `bool success`: Whether the secret environment variable addition was successful
@@ -313,8 +273,8 @@ Adds secret environment variables to the Terraform configuration.
 ```bash
 # Add secret environment variables to the Terraform configuration
 grpcurl -plaintext -d '{
-    "context": "dev",
-    "workspace": "project-a",
+    "user_id": "user123",
+    "project": "project-a",
     "secrets": [
         {
             "key": "AWS_ACCESS_KEY_ID",
@@ -333,11 +293,11 @@ grpcurl -plaintext -d '{
 Adds secret variables to the Terraform configuration.
 
 **Request:** `AddSecretVarRequest`
-- `string context`: Name of the context
-- `string workspace`: Name of the workspace
+- `string user_id`: User identifier
+- `string project`: Name of the project
 - `repeated SecretVar secrets`: List of secret variables to add
-        - `string key`: Key of the secret variable
-        - `string value`: Value of the secret variable
+    - `string key`: Key of the secret variable
+    - `string value`: Value of the secret variable
 
 **Response:** `AddSecretVarResponse`
 - `bool success`: Whether the secret variable addition was successful
@@ -347,8 +307,8 @@ Adds secret variables to the Terraform configuration.
 ```bash
 # Add secret variables to the Terraform configuration
 grpcurl -plaintext -d '{
-    "context": "dev",
-    "workspace": "project-a",
+    "user_id": "user123",
+    "project": "project-a",
     "secrets": [
         {
             "key": "db_password",
@@ -367,8 +327,8 @@ grpcurl -plaintext -d '{
 Clears secret variables from the Terraform configuration.
 
 **Request:** `ClearSecretVarsRequest`
-- `string context`: Name of the context
-- `string workspace`: Name of the workspace
+- `string user_id`: User identifier
+- `string project`: Name of the project
 
 **Response:** `ClearSecretVarsResponse`
 - `bool success`: Whether the secret variable clear operation was successful
@@ -378,9 +338,30 @@ Clears secret variables from the Terraform configuration.
 ```bash
 # Clear secret variables from the Terraform configuration
 grpcurl -plaintext -d '{
-    "context": "dev",
-    "workspace": "project-a"
+    "user_id": "user123",
+    "project": "project-a"
 }' localhost:50051 executor.Executor/ClearSecretVars
+```
+
+### ClearSecretEnv
+
+Clears secret environment variables from the Terraform configuration.
+
+**Request:** `ClearSecretEnvRequest`
+- `string user_id`: User identifier
+- `string project`: Name of the project
+
+**Response:** `ClearSecretEnvResponse`
+- `bool success`: Whether the secret environment variable clear operation was successful
+- `string error`: Error message, if any
+
+**Example:**
+```bash
+# Clear secret environment variables from the Terraform configuration
+grpcurl -plaintext -d '{
+    "user_id": "user123",
+    "project": "project-a"
+}' localhost:50051 executor.Executor/ClearSecretEnv
 ```
 
 ### ClearWorkspace
@@ -388,8 +369,8 @@ grpcurl -plaintext -d '{
 Clears the Terraform workspace.
 
 **Request:** `ClearWorkspaceRequest`
-- `string context`: Name of the context
-- `string workspace`: Name of the workspace
+- `string user_id`: User identifier
+- `string project`: Name of the project
 
 **Response:** `ClearWorkspaceResponse`
 - `bool success`: Whether the workspace clear operation was successful
@@ -399,8 +380,8 @@ Clears the Terraform workspace.
 ```bash
 # Clear the Terraform workspace
 grpcurl -plaintext -d '{
-    "context": "dev",
-    "workspace": "project-a"
+    "user_id": "user123",
+    "project": "project-a"
 }' localhost:50051 executor.Executor/ClearWorkspace
 ```
 
@@ -409,8 +390,8 @@ grpcurl -plaintext -d '{
 Gets the content of the main.tf file.
 
 **Request:** `GetMainTfRequest`
-- `string context`: Name of the context
-- `string workspace`: Name of the workspace
+- `string user_id`: User identifier
+- `string project`: Name of the project
 
 **Response:** `GetMainTfResponse`
 - `bool success`: Whether the operation was successful
@@ -421,7 +402,7 @@ Gets the content of the main.tf file.
 ```bash
 # Get the content of the main.tf file
 grpcurl -plaintext -d '{
-    "context": "dev",
-    "workspace": "project-a"
+    "user_id": "user123",
+    "project": "project-a"
 }' localhost:50051 executor.Executor/GetMainTf
 ```

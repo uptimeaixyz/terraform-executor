@@ -9,7 +9,7 @@ import (
 	"terraform-executor/internal/executor"
 )
 
-func GetManagementTests(ctx context.Context, svc *executor.ExecutorService, userId, contextName, workspaceName string) []utils.TestCase {
+func GetManagementTests(ctx context.Context, svc *executor.ExecutorService, userId, projectName string) []utils.TestCase {
 	return []utils.TestCase{
 		// Provider management
 		{
@@ -17,9 +17,8 @@ func GetManagementTests(ctx context.Context, svc *executor.ExecutorService, user
 			Category: "Management",
 			Fn: func() error {
 				resp, err := svc.AddProviders(ctx, &pb.AddProvidersRequest{
-					UserId:    userId,
-					Context:   contextName,
-					Workspace: workspaceName,
+					UserId:  userId,
+					Project: projectName,
 					Providers: []*pb.AddProvidersRequest_Provider{
 						{
 							Name:    "null",
@@ -33,7 +32,7 @@ func GetManagementTests(ctx context.Context, svc *executor.ExecutorService, user
 				}
 
 				// Verify ConfigMap
-				configMapName := fmt.Sprintf("%s.%s.versions.tf", contextName, workspaceName)
+				configMapName := fmt.Sprintf("%s.versions.tf", projectName)
 				cm, err := svc.K8sClient.GetConfigMap(ctx, userId, configMapName) // Updated to use ctx
 				if err != nil {
 					return fmt.Errorf("failed to get ConfigMap: %v", err)
@@ -50,9 +49,8 @@ func GetManagementTests(ctx context.Context, svc *executor.ExecutorService, user
 			Category: "Management",
 			Fn: func() error {
 				resp, err := svc.AddSecretEnv(ctx, &pb.AddSecretEnvRequest{
-					UserId:    userId,
-					Context:   contextName,
-					Workspace: workspaceName,
+					UserId:  userId,
+					Project: projectName,
 					Secrets: []*pb.AddSecretEnvRequest_Secret{
 						{
 							Name:  "AWS_REGION",
@@ -76,9 +74,8 @@ func GetManagementTests(ctx context.Context, svc *executor.ExecutorService, user
 			Category: "Management",
 			Fn: func() error {
 				resp, err := svc.AddSecretVar(ctx, &pb.AddSecretVarRequest{
-					UserId:    userId,
-					Context:   contextName,
-					Workspace: workspaceName,
+					UserId:  userId,
+					Project: projectName,
 					Secrets: []*pb.AddSecretVarRequest_Secret{
 						{
 							Name:  "do_token",
@@ -110,17 +107,16 @@ resource "null_resource" "example" {
 }
 `
 				resp, err := svc.AppendCode(ctx, &pb.AppendCodeRequest{
-					UserId:    userId,
-					Context:   contextName,
-					Workspace: workspaceName,
-					Code:      tfCode,
+					UserId:  userId,
+					Project: projectName,
+					Code:    tfCode,
 				})
 				if err != nil || !resp.Success {
 					return fmt.Errorf("failed to append code: %v", err)
 				}
 
 				// Verify ConfigMap
-				configMapName := fmt.Sprintf("%s.%s.main.tf", contextName, workspaceName)
+				configMapName := fmt.Sprintf("%s.main.tf", projectName)
 				cm, err := svc.K8sClient.GetConfigMap(ctx, userId, configMapName)
 				if err != nil {
 					return fmt.Errorf("failed to get ConfigMap: %v", err)
@@ -137,9 +133,8 @@ resource "null_resource" "example" {
 			Category: "Management",
 			Fn: func() error {
 				resp, err := svc.GetMainTf(ctx, &pb.GetMainTfRequest{
-					UserId:    userId,
-					Context:   contextName,
-					Workspace: workspaceName,
+					UserId:  userId,
+					Project: projectName,
 				})
 				if err != nil || !resp.Success {
 					return fmt.Errorf("failed to get main.tf content: %v", err)

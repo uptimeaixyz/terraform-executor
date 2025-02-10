@@ -3,8 +3,6 @@ package executor
 import (
 	"context"
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
 	pb "terraform-executor/api/proto"
 	"terraform-executor/pkg/utils"
@@ -20,7 +18,7 @@ func (s *ExecutorService) AppendCode(ctx context.Context, req *pb.AppendCodeRequ
 		return &pb.AppendCodeResponse{Success: false, Error: err.Error()}, nil
 	}
 
-	configMapName := fmt.Sprintf("%s.%s.%s", req.Context, req.Workspace, "main.tf")
+	configMapName := fmt.Sprintf("%s.%s", req.Project, "main.tf")
 
 	// Get existing ConfigMap or create new one
 	cm, err := s.K8sClient.GetConfigMap(ctx, req.UserId, configMapName)
@@ -60,7 +58,7 @@ func (s *ExecutorService) ClearCode(ctx context.Context, req *pb.ClearCodeReques
 		return &pb.ClearCodeResponse{Success: false, Error: err.Error()}, nil
 	}
 
-	configMapName := fmt.Sprintf("%s.%s.%s", req.Context, req.Workspace, "main.tf")
+	configMapName := fmt.Sprintf("%s.%s", req.Project, "main.tf")
 
 	// Delete ConfigMap
 	if err := s.K8sClient.DeleteConfigMap(ctx, req.UserId, configMapName); err != nil {
@@ -98,8 +96,7 @@ func (s *ExecutorService) AddProviders(ctx context.Context, req *pb.AddProviders
 	data := utils.TerraformTemplateData{
 		Bucket:    s.Bucket,
 		UserID:    req.UserId,
-		Context:   req.Context,
-		Workspace: req.Workspace,
+		Project:   req.Project,
 		Providers: providers,
 	}
 
@@ -113,7 +110,7 @@ func (s *ExecutorService) AddProviders(ctx context.Context, req *pb.AddProviders
 	}
 
 	// Create or update ConfigMap
-	configMapName := fmt.Sprintf("%s.%s.%s", req.Context, req.Workspace, "versions.tf")
+	configMapName := fmt.Sprintf("%s.%s", req.Project, "versions.tf")
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: configMapName,
@@ -160,7 +157,7 @@ func (s *ExecutorService) ClearProviders(ctx context.Context, req *pb.ClearProvi
 	}
 
 	// Remove ConfigMap
-	configMapName := fmt.Sprintf("%s.%s.%s", req.Context, req.Workspace, "versions.tf")
+	configMapName := fmt.Sprintf("%s.%s", req.Project, "versions.tf")
 	if err := s.K8sClient.DeleteConfigMap(ctx, req.UserId, configMapName); err != nil {
 		if !errors.IsNotFound(err) {
 			return &pb.ClearProvidersResponse{Success: false, Error: fmt.Sprintf("failed to delete ConfigMap: %v", err)}, nil
@@ -176,7 +173,7 @@ func (s *ExecutorService) AddSecretEnv(ctx context.Context, req *pb.AddSecretEnv
 		return &pb.AddSecretEnvResponse{Success: false, Error: err.Error()}, nil
 	}
 
-	secretName := fmt.Sprintf("%s.%s.%s", req.Context, req.Workspace, "env")
+	secretName := fmt.Sprintf("%s.%s", req.Project, "env")
 	// Get existing Secret or create new one
 	secret, err := s.K8sClient.GetSecret(ctx, req.UserId, secretName)
 	if err != nil {
@@ -209,14 +206,6 @@ func (s *ExecutorService) AddSecretEnv(ctx context.Context, req *pb.AddSecretEnv
 			return &pb.AddSecretEnvResponse{Success: false, Error: fmt.Sprintf("failed to update Secret: %v", err)}, nil
 		}
 	}
-
-	// Write the Terraform configuration to .env
-	workspaceDir := filepath.Join("./data/users", req.UserId, req.Context, req.Workspace)
-
-	// Ensure the workspace directory exists
-	if err := os.MkdirAll(workspaceDir, os.ModePerm); err != nil {
-		return &pb.AddSecretEnvResponse{Success: false, Error: fmt.Sprintf("failed to create workspace: %v", err)}, nil
-	}
 	return &pb.AddSecretEnvResponse{Success: true}, nil
 }
 
@@ -227,7 +216,7 @@ func (s *ExecutorService) ClearSecretEnv(ctx context.Context, req *pb.ClearSecre
 	}
 
 	// Remove Secret
-	secretName := fmt.Sprintf("%s.%s.%s", req.Context, req.Workspace, "env")
+	secretName := fmt.Sprintf("%s.%s", req.Project, "env")
 	if err := s.K8sClient.DeleteSecret(ctx, req.UserId, secretName); err != nil {
 		if !errors.IsNotFound(err) {
 			return &pb.ClearSecretEnvResponse{Success: false, Error: fmt.Sprintf("failed to delete Secret: %v", err)}, nil
@@ -243,7 +232,7 @@ func (s *ExecutorService) AddSecretVar(ctx context.Context, req *pb.AddSecretVar
 		return &pb.AddSecretVarResponse{Success: false, Error: err.Error()}, nil
 	}
 
-	configMapName := fmt.Sprintf("%s.%s.%s", req.Context, req.Workspace, "variables.tf")
+	configMapName := fmt.Sprintf("%s.%s", req.Project, "variables.tf")
 	// Get existing ConfigMap or create new one
 	cm, err := s.K8sClient.GetConfigMap(ctx, req.UserId, configMapName)
 	if err != nil {
@@ -285,7 +274,7 @@ func (s *ExecutorService) ClearSecretVars(ctx context.Context, req *pb.ClearSecr
 	}
 
 	// Remove ConfigMap
-	configMapName := fmt.Sprintf("%s.%s.%s", req.Context, req.Workspace, "variables.tf")
+	configMapName := fmt.Sprintf("%s.%s", req.Project, "variables.tf")
 	if err := s.K8sClient.DeleteConfigMap(ctx, req.UserId, configMapName); err != nil {
 		if !errors.IsNotFound(err) {
 			return &pb.ClearSecretVarsResponse{Success: false, Error: fmt.Sprintf("failed to delete ConfigMap: %v", err)}, nil
@@ -295,63 +284,60 @@ func (s *ExecutorService) ClearSecretVars(ctx context.Context, req *pb.ClearSecr
 	return &pb.ClearSecretVarsResponse{Success: true}, nil
 }
 
-// Clear Workspace
-func (s *ExecutorService) ClearWorkspace(ctx context.Context, req *pb.ClearWorkspaceRequest) (*pb.ClearWorkspaceResponse, error) {
+// Create a new project with the provided name.
+func (s *ExecutorService) CreateProject(ctx context.Context, req *pb.CreateProjectRequest) (*pb.CreateProjectResponse, error) {
 	if err := s.ensureNamespace(ctx, req.UserId); err != nil {
-		return &pb.ClearWorkspaceResponse{Success: false, Error: err.Error()}, nil
+		return &pb.CreateProjectResponse{Success: false, Error: err.Error()}, nil
+	}
+
+	return &pb.CreateProjectResponse{Success: true}, nil
+}
+
+// DeleteProject removes all resources associated with the project.
+func (s *ExecutorService) DeleteProject(ctx context.Context, req *pb.DeleteProjectRequest) (*pb.DeleteProjectResponse, error) {
+	if err := s.ensureNamespace(ctx, req.UserId); err != nil {
+		return &pb.DeleteProjectResponse{Success: false, Error: err.Error()}, nil
 	}
 
 	var errors []string
 
 	// Clear code
 	if _, err := s.ClearCode(ctx, &pb.ClearCodeRequest{
-		UserId:    req.UserId,
-		Context:   req.Context,
-		Workspace: req.Workspace,
+		UserId:  req.UserId,
+		Project: req.Project,
 	}); err != nil {
 		errors = append(errors, fmt.Sprintf("failed to clear code: %v", err))
 	}
 
 	// Clear providers
 	if _, err := s.ClearProviders(ctx, &pb.ClearProvidersRequest{
-		UserId:    req.UserId,
-		Context:   req.Context,
-		Workspace: req.Workspace,
+		UserId:  req.UserId,
+		Project: req.Project,
 	}); err != nil {
 		errors = append(errors, fmt.Sprintf("failed to clear providers: %v", err))
 	}
 
 	// Clear secret variables
 	if _, err := s.ClearSecretVars(ctx, &pb.ClearSecretVarsRequest{
-		UserId:    req.UserId,
-		Context:   req.Context,
-		Workspace: req.Workspace,
+		UserId:  req.UserId,
+		Project: req.Project,
 	}); err != nil {
 		errors = append(errors, fmt.Sprintf("failed to clear secret variables: %v", err))
 	}
 
 	// Clear secret env variables
 	if _, err := s.ClearSecretEnv(ctx, &pb.ClearSecretEnvRequest{
-		UserId:    req.UserId,
-		Context:   req.Context,
-		Workspace: req.Workspace,
+		UserId:  req.UserId,
+		Project: req.Project,
 	}); err != nil {
 		errors = append(errors, fmt.Sprintf("failed to clear secret env variables: %v", err))
 	}
 
 	if len(errors) > 0 {
-		return &pb.ClearWorkspaceResponse{Success: false, Error: strings.Join(errors, "; ")}, nil
+		return &pb.DeleteProjectResponse{Success: false, Error: strings.Join(errors, "; ")}, nil
 	}
 
-	// Clear workspace directory
-	workspaceDir := filepath.Join("./data/users", req.UserId, req.Context, req.Workspace)
-
-	// Remove the workspace directory
-	if err := os.RemoveAll(workspaceDir); err != nil {
-		return &pb.ClearWorkspaceResponse{Success: false, Error: fmt.Sprintf("failed to delete workspace: %v", err)}, nil
-	}
-
-	return &pb.ClearWorkspaceResponse{Success: true}, nil
+	return &pb.DeleteProjectResponse{Success: true}, nil
 }
 
 // GetMainTf returns the content of main.tf from ConfigMap
@@ -360,7 +346,7 @@ func (s *ExecutorService) GetMainTf(ctx context.Context, req *pb.GetMainTfReques
 		return &pb.GetMainTfResponse{Success: false, Error: err.Error()}, nil
 	}
 
-	configMapName := fmt.Sprintf("%s.%s.%s", req.Context, req.Workspace, "main.tf")
+	configMapName := fmt.Sprintf("%s.%s", req.Project, "main.tf")
 
 	// Get ConfigMap
 	cm, err := s.K8sClient.GetConfigMap(ctx, req.UserId, configMapName)
@@ -368,7 +354,7 @@ func (s *ExecutorService) GetMainTf(ctx context.Context, req *pb.GetMainTfReques
 		if errors.IsNotFound(err) {
 			return &pb.GetMainTfResponse{
 				Success: false,
-				Error:   fmt.Sprintf("main.tf does not exist for context %s and workspace %s", req.Context, req.Workspace),
+				Error:   fmt.Sprintf("main.tf does not exist for project %s", req.Project),
 			}, nil
 		}
 		return &pb.GetMainTfResponse{

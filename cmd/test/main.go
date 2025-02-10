@@ -56,15 +56,7 @@ func main() {
 
 func runTests(ctx context.Context, svc *executor.ExecutorService) error {
 	userId := "test-user"
-	contextName := "test-context"
-	workspaceName := "test-workspace"
-
-	// Initial cleanup before running tests
-	log.Println("\n🧹 Cleaning up previous test resources...")
-	if err := cases.CleanupTestResources(ctx, svc, userId, contextName, workspaceName); err != nil {
-		log.Printf("Warning: initial cleanup failed: %v", err)
-	}
-	log.Println("Cleanup completed")
+	projectName := "test-project"
 
 	log.Println("\n🚀 Starting test suite...")
 
@@ -73,10 +65,10 @@ func runTests(ctx context.Context, svc *executor.ExecutorService) error {
 		name  string
 		tests []utils.TestCase
 	}{
-		{"Cleanup", cases.GetCleanupTests(ctx, svc, userId, contextName, workspaceName)},
-		{"Setup", cases.GetSetupTests(ctx, svc, userId, contextName, workspaceName)},
-		{"Management", cases.GetManagementTests(ctx, svc, userId, contextName, workspaceName)},
-		{"Terraform", cases.GetTerraformTests(ctx, svc, userId, contextName, workspaceName)},
+		{"Cleanup", cases.GetCleanupTests(ctx, svc, userId, projectName)},
+		{"Setup", cases.GetSetupTests(ctx, svc, userId, projectName)},
+		{"Management", cases.GetManagementTests(ctx, svc, userId, projectName)},
+		{"Terraform", cases.GetTerraformTests(ctx, svc, userId, projectName)},
 	}
 
 	// Run all test categories

@@ -25,17 +25,14 @@ const (
 	Executor_Destroy_FullMethodName         = "/executor.Executor/Destroy"
 	Executor_GetStateList_FullMethodName    = "/executor.Executor/GetStateList"
 	Executor_ClearCode_FullMethodName       = "/executor.Executor/ClearCode"
-	Executor_CreateContext_FullMethodName   = "/executor.Executor/CreateContext"
-	Executor_DeleteContext_FullMethodName   = "/executor.Executor/DeleteContext"
-	Executor_CreateWorkspace_FullMethodName = "/executor.Executor/CreateWorkspace"
-	Executor_DeleteWorkspace_FullMethodName = "/executor.Executor/DeleteWorkspace"
+	Executor_CreateProject_FullMethodName   = "/executor.Executor/CreateProject"
+	Executor_DeleteProject_FullMethodName   = "/executor.Executor/DeleteProject"
 	Executor_AddProviders_FullMethodName    = "/executor.Executor/AddProviders"
 	Executor_ClearProviders_FullMethodName  = "/executor.Executor/ClearProviders"
 	Executor_AddSecretEnv_FullMethodName    = "/executor.Executor/AddSecretEnv"
 	Executor_ClearSecretEnv_FullMethodName  = "/executor.Executor/ClearSecretEnv"
 	Executor_AddSecretVar_FullMethodName    = "/executor.Executor/AddSecretVar"
 	Executor_ClearSecretVars_FullMethodName = "/executor.Executor/ClearSecretVars"
-	Executor_ClearWorkspace_FullMethodName  = "/executor.Executor/ClearWorkspace"
 	Executor_GetMainTf_FullMethodName       = "/executor.Executor/GetMainTf"
 )
 
@@ -57,14 +54,10 @@ type ExecutorClient interface {
 	GetStateList(ctx context.Context, in *GetStateListRequest, opts ...grpc.CallOption) (*GetStateListResponse, error)
 	// Clears the Terraform files.
 	ClearCode(ctx context.Context, in *ClearCodeRequest, opts ...grpc.CallOption) (*ClearCodeResponse, error)
-	// Creates a new context.
-	CreateContext(ctx context.Context, in *CreateContextRequest, opts ...grpc.CallOption) (*CreateContextResponse, error)
-	// Deletes a context.
-	DeleteContext(ctx context.Context, in *DeleteContextRequest, opts ...grpc.CallOption) (*DeleteContextResponse, error)
-	// Creates a workspace within a context.
-	CreateWorkspace(ctx context.Context, in *CreateWorkspaceRequest, opts ...grpc.CallOption) (*CreateWorkspaceResponse, error)
-	// Deletes a workspace within a context.
-	DeleteWorkspace(ctx context.Context, in *DeleteWorkspaceRequest, opts ...grpc.CallOption) (*DeleteWorkspaceResponse, error)
+	// Creates a new project.
+	CreateProject(ctx context.Context, in *CreateProjectRequest, opts ...grpc.CallOption) (*CreateProjectResponse, error)
+	// Deletes a project.
+	DeleteProject(ctx context.Context, in *DeleteProjectRequest, opts ...grpc.CallOption) (*DeleteProjectResponse, error)
 	// Adds providers to the Terraform configuration.
 	AddProviders(ctx context.Context, in *AddProvidersRequest, opts ...grpc.CallOption) (*AddProvidersResponse, error)
 	// Clears the providers from the Terraform configuration.
@@ -77,8 +70,6 @@ type ExecutorClient interface {
 	AddSecretVar(ctx context.Context, in *AddSecretVarRequest, opts ...grpc.CallOption) (*AddSecretVarResponse, error)
 	// Clears the secret vars from the Terraform configuration.
 	ClearSecretVars(ctx context.Context, in *ClearSecretVarsRequest, opts ...grpc.CallOption) (*ClearSecretVarsResponse, error)
-	// Clears the workspace.
-	ClearWorkspace(ctx context.Context, in *ClearWorkspaceRequest, opts ...grpc.CallOption) (*ClearWorkspaceResponse, error)
 	// Gets the content of main.tf file
 	GetMainTf(ctx context.Context, in *GetMainTfRequest, opts ...grpc.CallOption) (*GetMainTfResponse, error)
 }
@@ -151,40 +142,20 @@ func (c *executorClient) ClearCode(ctx context.Context, in *ClearCodeRequest, op
 	return out, nil
 }
 
-func (c *executorClient) CreateContext(ctx context.Context, in *CreateContextRequest, opts ...grpc.CallOption) (*CreateContextResponse, error) {
+func (c *executorClient) CreateProject(ctx context.Context, in *CreateProjectRequest, opts ...grpc.CallOption) (*CreateProjectResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateContextResponse)
-	err := c.cc.Invoke(ctx, Executor_CreateContext_FullMethodName, in, out, cOpts...)
+	out := new(CreateProjectResponse)
+	err := c.cc.Invoke(ctx, Executor_CreateProject_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *executorClient) DeleteContext(ctx context.Context, in *DeleteContextRequest, opts ...grpc.CallOption) (*DeleteContextResponse, error) {
+func (c *executorClient) DeleteProject(ctx context.Context, in *DeleteProjectRequest, opts ...grpc.CallOption) (*DeleteProjectResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteContextResponse)
-	err := c.cc.Invoke(ctx, Executor_DeleteContext_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *executorClient) CreateWorkspace(ctx context.Context, in *CreateWorkspaceRequest, opts ...grpc.CallOption) (*CreateWorkspaceResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateWorkspaceResponse)
-	err := c.cc.Invoke(ctx, Executor_CreateWorkspace_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *executorClient) DeleteWorkspace(ctx context.Context, in *DeleteWorkspaceRequest, opts ...grpc.CallOption) (*DeleteWorkspaceResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteWorkspaceResponse)
-	err := c.cc.Invoke(ctx, Executor_DeleteWorkspace_FullMethodName, in, out, cOpts...)
+	out := new(DeleteProjectResponse)
+	err := c.cc.Invoke(ctx, Executor_DeleteProject_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -251,16 +222,6 @@ func (c *executorClient) ClearSecretVars(ctx context.Context, in *ClearSecretVar
 	return out, nil
 }
 
-func (c *executorClient) ClearWorkspace(ctx context.Context, in *ClearWorkspaceRequest, opts ...grpc.CallOption) (*ClearWorkspaceResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ClearWorkspaceResponse)
-	err := c.cc.Invoke(ctx, Executor_ClearWorkspace_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *executorClient) GetMainTf(ctx context.Context, in *GetMainTfRequest, opts ...grpc.CallOption) (*GetMainTfResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetMainTfResponse)
@@ -289,14 +250,10 @@ type ExecutorServer interface {
 	GetStateList(context.Context, *GetStateListRequest) (*GetStateListResponse, error)
 	// Clears the Terraform files.
 	ClearCode(context.Context, *ClearCodeRequest) (*ClearCodeResponse, error)
-	// Creates a new context.
-	CreateContext(context.Context, *CreateContextRequest) (*CreateContextResponse, error)
-	// Deletes a context.
-	DeleteContext(context.Context, *DeleteContextRequest) (*DeleteContextResponse, error)
-	// Creates a workspace within a context.
-	CreateWorkspace(context.Context, *CreateWorkspaceRequest) (*CreateWorkspaceResponse, error)
-	// Deletes a workspace within a context.
-	DeleteWorkspace(context.Context, *DeleteWorkspaceRequest) (*DeleteWorkspaceResponse, error)
+	// Creates a new project.
+	CreateProject(context.Context, *CreateProjectRequest) (*CreateProjectResponse, error)
+	// Deletes a project.
+	DeleteProject(context.Context, *DeleteProjectRequest) (*DeleteProjectResponse, error)
 	// Adds providers to the Terraform configuration.
 	AddProviders(context.Context, *AddProvidersRequest) (*AddProvidersResponse, error)
 	// Clears the providers from the Terraform configuration.
@@ -309,8 +266,6 @@ type ExecutorServer interface {
 	AddSecretVar(context.Context, *AddSecretVarRequest) (*AddSecretVarResponse, error)
 	// Clears the secret vars from the Terraform configuration.
 	ClearSecretVars(context.Context, *ClearSecretVarsRequest) (*ClearSecretVarsResponse, error)
-	// Clears the workspace.
-	ClearWorkspace(context.Context, *ClearWorkspaceRequest) (*ClearWorkspaceResponse, error)
 	// Gets the content of main.tf file
 	GetMainTf(context.Context, *GetMainTfRequest) (*GetMainTfResponse, error)
 	mustEmbedUnimplementedExecutorServer()
@@ -341,17 +296,11 @@ func (UnimplementedExecutorServer) GetStateList(context.Context, *GetStateListRe
 func (UnimplementedExecutorServer) ClearCode(context.Context, *ClearCodeRequest) (*ClearCodeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ClearCode not implemented")
 }
-func (UnimplementedExecutorServer) CreateContext(context.Context, *CreateContextRequest) (*CreateContextResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateContext not implemented")
+func (UnimplementedExecutorServer) CreateProject(context.Context, *CreateProjectRequest) (*CreateProjectResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateProject not implemented")
 }
-func (UnimplementedExecutorServer) DeleteContext(context.Context, *DeleteContextRequest) (*DeleteContextResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteContext not implemented")
-}
-func (UnimplementedExecutorServer) CreateWorkspace(context.Context, *CreateWorkspaceRequest) (*CreateWorkspaceResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateWorkspace not implemented")
-}
-func (UnimplementedExecutorServer) DeleteWorkspace(context.Context, *DeleteWorkspaceRequest) (*DeleteWorkspaceResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteWorkspace not implemented")
+func (UnimplementedExecutorServer) DeleteProject(context.Context, *DeleteProjectRequest) (*DeleteProjectResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteProject not implemented")
 }
 func (UnimplementedExecutorServer) AddProviders(context.Context, *AddProvidersRequest) (*AddProvidersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddProviders not implemented")
@@ -370,9 +319,6 @@ func (UnimplementedExecutorServer) AddSecretVar(context.Context, *AddSecretVarRe
 }
 func (UnimplementedExecutorServer) ClearSecretVars(context.Context, *ClearSecretVarsRequest) (*ClearSecretVarsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ClearSecretVars not implemented")
-}
-func (UnimplementedExecutorServer) ClearWorkspace(context.Context, *ClearWorkspaceRequest) (*ClearWorkspaceResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ClearWorkspace not implemented")
 }
 func (UnimplementedExecutorServer) GetMainTf(context.Context, *GetMainTfRequest) (*GetMainTfResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMainTf not implemented")
@@ -506,74 +452,38 @@ func _Executor_ClearCode_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Executor_CreateContext_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateContextRequest)
+func _Executor_CreateProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateProjectRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ExecutorServer).CreateContext(ctx, in)
+		return srv.(ExecutorServer).CreateProject(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Executor_CreateContext_FullMethodName,
+		FullMethod: Executor_CreateProject_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ExecutorServer).CreateContext(ctx, req.(*CreateContextRequest))
+		return srv.(ExecutorServer).CreateProject(ctx, req.(*CreateProjectRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Executor_DeleteContext_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteContextRequest)
+func _Executor_DeleteProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteProjectRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ExecutorServer).DeleteContext(ctx, in)
+		return srv.(ExecutorServer).DeleteProject(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Executor_DeleteContext_FullMethodName,
+		FullMethod: Executor_DeleteProject_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ExecutorServer).DeleteContext(ctx, req.(*DeleteContextRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Executor_CreateWorkspace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateWorkspaceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ExecutorServer).CreateWorkspace(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Executor_CreateWorkspace_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ExecutorServer).CreateWorkspace(ctx, req.(*CreateWorkspaceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Executor_DeleteWorkspace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteWorkspaceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ExecutorServer).DeleteWorkspace(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Executor_DeleteWorkspace_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ExecutorServer).DeleteWorkspace(ctx, req.(*DeleteWorkspaceRequest))
+		return srv.(ExecutorServer).DeleteProject(ctx, req.(*DeleteProjectRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -686,24 +596,6 @@ func _Executor_ClearSecretVars_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Executor_ClearWorkspace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ClearWorkspaceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ExecutorServer).ClearWorkspace(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Executor_ClearWorkspace_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ExecutorServer).ClearWorkspace(ctx, req.(*ClearWorkspaceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Executor_GetMainTf_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetMainTfRequest)
 	if err := dec(in); err != nil {
@@ -754,20 +646,12 @@ var Executor_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Executor_ClearCode_Handler,
 		},
 		{
-			MethodName: "CreateContext",
-			Handler:    _Executor_CreateContext_Handler,
+			MethodName: "CreateProject",
+			Handler:    _Executor_CreateProject_Handler,
 		},
 		{
-			MethodName: "DeleteContext",
-			Handler:    _Executor_DeleteContext_Handler,
-		},
-		{
-			MethodName: "CreateWorkspace",
-			Handler:    _Executor_CreateWorkspace_Handler,
-		},
-		{
-			MethodName: "DeleteWorkspace",
-			Handler:    _Executor_DeleteWorkspace_Handler,
+			MethodName: "DeleteProject",
+			Handler:    _Executor_DeleteProject_Handler,
 		},
 		{
 			MethodName: "AddProviders",
@@ -792,10 +676,6 @@ var Executor_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ClearSecretVars",
 			Handler:    _Executor_ClearSecretVars_Handler,
-		},
-		{
-			MethodName: "ClearWorkspace",
-			Handler:    _Executor_ClearWorkspace_Handler,
 		},
 		{
 			MethodName: "GetMainTf",
