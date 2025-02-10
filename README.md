@@ -171,7 +171,7 @@ AWS_SECRET_ACCESS_KEY=secret_access_key
 AWS_REGION=eu-west-3
 
 # S3 bucket
-BUCKET=uptimeai-test-bucket
+BUCKET_NAME=uptimeai-test-bucket
 
 # Kubernetes configuration (if running outside the cluster)
 KUBECONFIG=/path/to/kubeconfig

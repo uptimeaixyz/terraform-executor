@@ -257,3 +257,22 @@ service Executor {
   // Gets the content of main.tf file
   rpc GetMainTf(GetMainTfRequest) returns (GetMainTfResponse);
 }
+
+// Health Check service definition
+service Health {
+  // Check returns the serving status of the server.
+  rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  enum ServingStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+  }
+  ServingStatus status = 1;
+  map<string, ServingStatus> components = 2;  // Add component status
+  map<string, string> errors = 3;            // Add error messages for components
+}

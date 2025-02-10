@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/reflection"
 	pb "terraform-executor/api/proto"
 	"terraform-executor/internal/executor"
+	"terraform-executor/internal/health"
 )
 
 // StartServer starts the gRPC server.
@@ -30,6 +31,10 @@ func StartServer(ctx context.Context, address string) error {
 
 	// Register the Executor service with the gRPC server
 	pb.RegisterExecutorServer(grpcServer, executorService)
+
+	// Create and register health service with dependencies
+	healthService := health.NewHealthService(executorService.K8sClient, executorService.AWSClient)
+	pb.RegisterHealthServer(grpcServer, healthService)
 
 	// Enable gRPC reflection for easier client interaction
 	reflection.Register(grpcServer)

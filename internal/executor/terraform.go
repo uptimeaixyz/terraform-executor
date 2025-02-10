@@ -9,6 +9,10 @@ import (
 	"terraform-executor/internal/awsclient"
 
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ensureNamespace ensures that a namespace exists for the given user
@@ -99,36 +103,67 @@ func (s *ExecutorService) ensureAWSCredentials(ctx context.Context, userId strin
 	return nil
 }
 
-// Plan generates a Terraform plan and returns the result.
-func (s *ExecutorService) Plan(ctx context.Context, req *pb.PlanRequest) (*pb.PlanResponse, error) {
-	if err := s.ensureNamespace(ctx, req.UserId); err != nil {
-		return &pb.PlanResponse{
-			Success: false,
-			Error:   fmt.Sprintf("namespace error: %v", err),
-		}, nil
+// ensurePVC ensures that a PVC exists for plugin cache
+func (s *ExecutorService) ensurePVC(ctx context.Context, namespace string) error {
+	pvc := &corev1.PersistentVolumeClaim{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      fmt.Sprintf("%s-plugin-cache", namespace),
+			Namespace: namespace,
+		},
+		Spec: corev1.PersistentVolumeClaimSpec{
+			AccessModes: []corev1.PersistentVolumeAccessMode{
+				corev1.ReadWriteOnce,
+			},
+			Resources: corev1.VolumeResourceRequirements{
+				Requests: corev1.ResourceList{
+					corev1.ResourceStorage: resource.MustParse("1Gi"),
+				},
+			},
+		},
+	}
+
+	err := s.K8sClient.CreatePVC(ctx, namespace, pvc)
+	if err != nil && !k8serrors.IsAlreadyExists(err) {
+		return fmt.Errorf("failed to create plugins PVC: %v", err)
+	}
+	return nil
+}
+
+// ensureResources ensures all required resources exist for the given user
+func (s *ExecutorService) ensureResources(ctx context.Context, userId string) error {
+	// Ensure namespace exists
+	if err := s.ensureNamespace(ctx, userId); err != nil {
+		return fmt.Errorf("namespace error: %w", err)
 	}
 
 	// Ensure AWS role exists
-	if err := s.ensureUserRole(ctx, req.UserId); err != nil {
-		return &pb.PlanResponse{
-			Success: false,
-			Error:   fmt.Sprintf("AWS role error: %v", err),
-		}, nil
+	if err := s.ensureUserRole(ctx, userId); err != nil {
+		return fmt.Errorf("AWS role error: %w", err)
 	}
 
 	// Ensure AWS credentials are fresh
-	if err := s.ensureAWSCredentials(ctx, req.UserId); err != nil {
+	if err := s.ensureAWSCredentials(ctx, userId); err != nil {
+		return fmt.Errorf("AWS credentials error: %w", err)
+	}
+
+	// Ensure PVC exists
+	if err := s.ensurePVC(ctx, userId); err != nil {
+		return fmt.Errorf("PVC error: %w", err)
+	}
+
+	return nil
+}
+
+// Plan generates a Terraform plan and returns the result.
+func (s *ExecutorService) Plan(ctx context.Context, req *pb.PlanRequest) (*pb.PlanResponse, error) {
+	if err := s.ensureResources(ctx, req.UserId); err != nil {
 		return &pb.PlanResponse{
 			Success: false,
-			Error:   fmt.Sprintf("AWS credentials error: %v", err),
+			Error:   err.Error(),
 		}, nil
 	}
 
-	jobName := fmt.Sprintf(
-		"terraform-plan-%s-%s",
-		req.UserId,
-		time.Now().Format("20060102150405"),
-	)
+	jobName := fmt.Sprintf("terraform-plan-%s-%s", req.UserId, time.Now().Format("20060102150405"))
 	job, err := s.createTerraformJobTemplate(ctx, jobName, req.UserId, req.Project, "plan", []string{"plan", "-input=false", "-no-color"})
 	if err != nil {
 		if s.Debug {
@@ -169,26 +204,10 @@ func (s *ExecutorService) Plan(ctx context.Context, req *pb.PlanRequest) (*pb.Pl
 
 // Apply applies a Terraform plan or configuration and returns the result.
 func (s *ExecutorService) Apply(ctx context.Context, req *pb.ApplyRequest) (*pb.ApplyResponse, error) {
-	if err := s.ensureNamespace(ctx, req.UserId); err != nil {
+	if err := s.ensureResources(ctx, req.UserId); err != nil {
 		return &pb.ApplyResponse{
 			Success: false,
-			Error:   fmt.Sprintf("namespace error: %v", err),
-		}, nil
-	}
-
-	// Ensure AWS role exists
-	if err := s.ensureUserRole(ctx, req.UserId); err != nil {
-		return &pb.ApplyResponse{
-			Success: false,
-			Error:   fmt.Sprintf("AWS role error: %v", err),
-		}, nil
-	}
-
-	// Ensure AWS credentials are fresh
-	if err := s.ensureAWSCredentials(ctx, req.UserId); err != nil {
-		return &pb.ApplyResponse{
-			Success: false,
-			Error:   fmt.Sprintf("AWS credentials error: %v", err),
+			Error:   err.Error(),
 		}, nil
 	}
 
@@ -226,23 +245,10 @@ func (s *ExecutorService) Apply(ctx context.Context, req *pb.ApplyRequest) (*pb.
 
 // Destroy destroys the Terraform-managed infrastructure and returns the result.
 func (s *ExecutorService) Destroy(ctx context.Context, req *pb.DestroyRequest) (*pb.DestroyResponse, error) {
-	if err := s.ensureNamespace(ctx, req.UserId); err != nil {
-		return &pb.DestroyResponse{Success: false, Error: err.Error()}, nil
-	}
-
-	// Ensure AWS role exists
-	if err := s.ensureUserRole(ctx, req.UserId); err != nil {
+	if err := s.ensureResources(ctx, req.UserId); err != nil {
 		return &pb.DestroyResponse{
 			Success: false,
-			Error:   fmt.Sprintf("AWS role error: %v", err),
-		}, nil
-	}
-
-	// Ensure AWS credentials are fresh
-	if err := s.ensureAWSCredentials(ctx, req.UserId); err != nil {
-		return &pb.DestroyResponse{
-			Success: false,
-			Error:   fmt.Sprintf("AWS credentials error: %v", err),
+			Error:   err.Error(),
 		}, nil
 	}
 
@@ -254,13 +260,20 @@ func (s *ExecutorService) Destroy(ctx context.Context, req *pb.DestroyRequest) (
 
 	_, err = s.K8sClient.CreateJob(ctx, req.UserId, job)
 	if err != nil {
-		return &pb.DestroyResponse{Success: false, Error: err.Error()}, nil
+		return &pb.DestroyResponse{
+			Success: false,
+			Error:   fmt.Sprintf("kubernetes job creation failed: %v", err),
+		}, nil
 	}
 
 	// Wait for job completion and get logs
 	output, err := s.waitForJobAndGetLogs(ctx, req.UserId, jobName)
 	if err != nil {
-		return &pb.DestroyResponse{Success: false, Error: err.Error()}, nil
+		return &pb.DestroyResponse{
+			Success:       false,
+			Error:         fmt.Sprintf("job execution failed: %v", err),
+			DestroyOutput: output,
+		}, nil
 	}
 
 	return &pb.DestroyResponse{Success: true, DestroyOutput: output}, nil
@@ -268,10 +281,10 @@ func (s *ExecutorService) Destroy(ctx context.Context, req *pb.DestroyRequest) (
 
 // GetStateList returns output of "terraform state list" command
 func (s *ExecutorService) GetStateList(ctx context.Context, req *pb.GetStateListRequest) (*pb.GetStateListResponse, error) {
-	if err := s.ensureNamespace(ctx, req.UserId); err != nil {
+	if err := s.ensureResources(ctx, req.UserId); err != nil {
 		return &pb.GetStateListResponse{
 			Success: false,
-			Error:   fmt.Sprintf("namespace error: %v", err),
+			Error:   err.Error(),
 		}, nil
 	}
 
