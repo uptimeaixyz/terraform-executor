@@ -12,15 +12,19 @@ type ProviderConfig struct {
 }
 
 type TerraformTemplateData struct {
-	BackendPath string
-	Providers   []ProviderConfig
-	Workspace   string
+	Bucket    string
+	UserID    string
+	Project   string
+	Providers []ProviderConfig
 }
 
 const terraformTemplate = `
 terraform {
-    backend "local" {
-        path = "{{ .BackendPath }}"
+    backend "s3" {
+        bucket  = "{{ .Bucket }}"
+		key     = "{{ .UserID }}/{{ .Project }}/terraform.tfstate"
+		region  = "eu-west-3"
+		profile = "tfstate"
     }
     required_providers {
 {{- range .Providers }}
@@ -47,24 +51,3 @@ func GenerateTerraformConfig(data TerraformTemplateData) (string, error) {
 
 	return buf.String(), nil
 }
-
-// func main() {
-// 	// Example data for generating the template
-// 	data := TerraformTemplateData{
-// 		BackendPath: "terraform.tfstate",
-// 		Providers: []ProviderConfig{
-// 			{Name: "digitalocean", Source: "digitalocean/digitalocean", Version: "2.5.0"},
-// 			{Name: "aws", Source: "hashicorp/aws", Version: "4.0.0"},
-// 		},
-// 		Workspace: "prod",
-// 	}
-
-// 	// Generate the Terraform configuration
-// 	config, err := GenerateTerraformConfig(data)
-// 	if err != nil {
-// 		fmt.Println("Error generating Terraform config:", err)
-// 		return
-// 	}
-
-// 	fmt.Println(config)
-// }

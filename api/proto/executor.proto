@@ -6,9 +6,9 @@ option go_package = "api/proto;executor";
 
 // Request to append code to configuration
 message AppendCodeRequest {
-  string context = 1; // Name of the context
-  string workspace = 2; // Name of the Terraform workspace
-  string code = 3; // The Terraform configuration code snippet
+  string user_id = 1;  // User identifier
+  string project = 2;  // Name of the project
+  string code = 3;     // The Terraform configuration code snippet
 }
 
 // Response to append code to configuration
@@ -19,8 +19,8 @@ message AppendCodeResponse {
 
 // Request for Terraform Plan
 message PlanRequest {
-  string context = 1; // Name of the context
-  string workspace = 2; // Name of the Terraform workspace
+  string user_id = 1;  // User identifier
+  string project = 2;  // Name of the project
 }
 
 // Response for Terraform Plan
@@ -32,8 +32,8 @@ message PlanResponse {
 
 // Request for Terraform Apply
 message ApplyRequest {
-  string context = 1; // Name of the context
-  string workspace = 2; // Name of the Terraform workspace
+  string user_id = 1;  // User identifier
+  string project = 2;  // Name of the project
   string plan_file = 3; // Path to the saved Terraform plan file (optional)
 }
 
@@ -46,8 +46,8 @@ message ApplyResponse {
 
 // Request for Terraform Destroy
 message DestroyRequest {
-  string context = 1; // Name of the context
-  string workspace = 2; // Name of the Terraform workspace
+  string user_id = 1;  // User identifier
+  string project = 2;  // Name of the project
 }
 
 // Response for Terraform Destroy
@@ -59,8 +59,8 @@ message DestroyResponse {
 
 // Request for Terraform state list
 message GetStateListRequest {
-  string context = 1; // Name of the context
-  string workspace = 2; // Name of the Terraform workspace
+  string user_id = 1;  // User identifier
+  string project = 2;  // Name of the project
 }
 
 // Response for Terraform state list
@@ -72,8 +72,8 @@ message GetStateListResponse {
 
 // Request to clear terraform code
 message ClearCodeRequest {
-  string context = 1; // Name of the context
-  string workspace = 2; // Name of the Terraform workspace
+  string user_id = 1;  // User identifier
+  string project = 2;  // Name of the project
 }
 
 // Response to clear terraform code
@@ -82,56 +82,34 @@ message ClearCodeResponse {
   string error = 2;     // Error message, if any
 }
 
-// Request to create new context
-message CreateContextRequest {
-  string context = 1; // Name of the context
+// Request to create new project
+message CreateProjectRequest {
+  string user_id = 1;  // User identifier
+  string project = 2;  // Name of the project
 }
 
-// Response to create new context
-message CreateContextResponse {
-  bool success = 1;     // Whether the context creation was successful
+// Response to create new project
+message CreateProjectResponse {
+  bool success = 1;     // Whether the project creation was successful
   string error = 2;     // Error message, if any
 }
 
-// Request to delete context
-message DeleteContextRequest {
-  string context = 1; // Name of the context
+// Request to delete project
+message DeleteProjectRequest {
+  string user_id = 1;  // User identifier
+  string project = 2;  // Name of the project
 }
 
-// Response to delete context
-message DeleteContextResponse {
-  bool success = 1;     // Whether the context deletion was successful
-  string error = 2;     // Error message, if any
-}
-
-// Request to create workspace within context
-message CreateWorkspaceRequest {
-  string context = 1; // Name of the context
-  string workspace = 2; // Name of the workspace
-}
-
-// Response to create workspace within context
-message CreateWorkspaceResponse {
-  bool success = 1;     // Whether the workspace creation was successful
-  string error = 2;     // Error message, if any
-}
-
-// Request to delete workspace within context
-message DeleteWorkspaceRequest {
-  string context = 1; // Name of the context
-  string workspace = 2; // Name of the workspace
-}
-
-// Response to delete workspace within context
-message DeleteWorkspaceResponse {
-  bool success = 1;     // Whether the workspace deletion was successful
+// Response to delete project
+message DeleteProjectResponse {
+  bool success = 1;     // Whether the project deletion was successful
   string error = 2;     // Error message, if any
 }
 
 // Request to add providers to the Terraform configuration
 message AddProvidersRequest {
-  string context = 1; // Name of the context
-  string workspace = 2; // Name of the workspace
+  string user_id = 1;  // User identifier
+  string project = 2;  // Name of the project
   repeated Provider providers = 3; // List of providers to add
 
   message Provider {
@@ -149,8 +127,8 @@ message AddProvidersResponse {
 
 // Request to clear providers from the Terraform configuration
 message ClearProvidersRequest {
-  string context = 1; // Name of the context
-  string workspace = 2; // Name of the workspace
+  string user_id = 1;  // User identifier
+  string project = 2;  // Name of the project
 }
 
 // Response to clear providers from the Terraform configuration
@@ -159,22 +137,10 @@ message ClearProvidersResponse {
   string error = 2;     // Error message, if any
 }
 
-// Request to clear workspace
-message ClearWorkspaceRequest {
-  string context = 1; // Name of the context
-  string workspace = 2; // Name of the workspace
-}
-
-// Response to clear workspace
-message ClearWorkspaceResponse {
-  bool success = 1;     // Whether the workspace clear operation was successful
-  string error = 2;     // Error message, if any
-}
-
 // Request to add secret env variables to the Terraform configuration
 message AddSecretEnvRequest {
-  string context = 1; // Name of the context
-  string workspace = 2; // Name of the workspace
+  string user_id = 1;  // User identifier
+  string project = 2;  // Name of the project
   repeated Secret secrets = 3; // List of secrets to add
 
   message Secret {
@@ -189,10 +155,22 @@ message AddSecretEnvResponse {
   string error = 2;     // Error message, if any
 }
 
+// Request to clear secret env vars from the Terraform configuration
+message ClearSecretEnvRequest {
+  string user_id = 1;  // User identifier
+  string project = 2;  // Name of the project
+}
+
+// Response to clear secret env vars from the Terraform configuration
+message ClearSecretEnvResponse {
+  bool success = 1;     // Whether the secret env vars clear operation was successful
+  string error = 2;     // Error message, if any
+}
+
 // Request to add secret terraform variables to the Terraform configuration
 message AddSecretVarRequest {
-  string context = 1; // Name of the context
-  string workspace = 2; // Name of the workspace
+  string user_id = 1;  // User identifier
+  string project = 2;  // Name of the project
   repeated Secret secrets = 3; // List of secrets to add
 
   message Secret {
@@ -207,10 +185,10 @@ message AddSecretVarResponse {
   string error = 2;     // Error message, if any
 }
 
-// Request to clear seret vars from the Terraform configuration
+// Request to clear secret vars from the Terraform configuration
 message ClearSecretVarsRequest {
-  string context = 1; // Name of the context
-  string workspace = 2; // Name of the workspace
+  string user_id = 1;  // User identifier
+  string project = 2;  // Name of the project
 }
 
 // Response to clear secret vars from the Terraform configuration
@@ -221,8 +199,8 @@ message ClearSecretVarsResponse {
 
 // Request to get main.tf content
 message GetMainTfRequest {
-  string context = 1;   // Name of the context
-  string workspace = 2; // Name of the workspace
+  string user_id = 1;  // User identifier
+  string project = 2;  // Name of the project
 }
 
 // Response with main.tf content
@@ -252,32 +230,26 @@ service Executor {
   // Clears the Terraform files.
   rpc ClearCode(ClearCodeRequest) returns (ClearCodeResponse);
 
-  // Creates a new context.
-  rpc CreateContext(CreateContextRequest) returns (CreateContextResponse);
+  // Creates a new project.
+  rpc CreateProject(CreateProjectRequest) returns (CreateProjectResponse);
 
-  // Deletes a context.
-  rpc DeleteContext(DeleteContextRequest) returns (DeleteContextResponse);
-
-  // Creates a workspace within a context.
-  rpc CreateWorkspace(CreateWorkspaceRequest) returns (CreateWorkspaceResponse);
-
-  // Deletes a workspace within a context.
-  rpc DeleteWorkspace(DeleteWorkspaceRequest) returns (DeleteWorkspaceResponse);
+  // Deletes a project.
+  rpc DeleteProject(DeleteProjectRequest) returns (DeleteProjectResponse);
 
   // Adds providers to the Terraform configuration.
   rpc AddProviders(AddProvidersRequest) returns (AddProvidersResponse);
 
-  // Adds a secret env to the Terraform configuration.
-  rpc AddSecretEnv(AddSecretEnvRequest) returns (AddSecretEnvResponse);
-
-  // Adds a secret variable to the Terraform configuration.
-  rpc AddSecretVar(AddSecretVarRequest) returns (AddSecretVarResponse);
-
   // Clears the providers from the Terraform configuration.
   rpc ClearProviders(ClearProvidersRequest) returns (ClearProvidersResponse);
 
-  // Clears the workspace.
-  rpc ClearWorkspace(ClearWorkspaceRequest) returns (ClearWorkspaceResponse);
+  // Adds a secret env to the Terraform configuration.
+  rpc AddSecretEnv(AddSecretEnvRequest) returns (AddSecretEnvResponse);
+
+  // Clears the secret env vars from the Terraform configuration.
+  rpc ClearSecretEnv(ClearSecretEnvRequest) returns (ClearSecretEnvResponse);
+
+  // Adds a secret variable to the Terraform configuration.
+  rpc AddSecretVar(AddSecretVarRequest) returns (AddSecretVarResponse);
 
   // Clears the secret vars from the Terraform configuration.
   rpc ClearSecretVars(ClearSecretVarsRequest) returns (ClearSecretVarsResponse);
