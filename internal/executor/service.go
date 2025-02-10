@@ -34,7 +34,7 @@ func NewExecutorService(ctx context.Context) (*ExecutorService, error) {
 		return nil, fmt.Errorf("failed to create AWS client: %v", err)
 	}
 	fmt.Println("AWS client created")
-	bucket := os.Getenv("BUCKET")
+	bucket := os.Getenv("BUCKET_NAME")
 	// fallback to default bucket
 	if bucket == "" {
 		bucket = "uptimeai-test-bucket"
