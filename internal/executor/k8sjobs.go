@@ -89,30 +89,6 @@ func (s *ExecutorService) createTerraformJobTemplate(ctx context.Context, name, 
 		},
 	}
 
-	// Create PVC if it doesn't exist
-	pvc := &corev1.PersistentVolumeClaim{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-plugin-cache", namespace),
-			Namespace: namespace,
-		},
-		Spec: corev1.PersistentVolumeClaimSpec{
-			AccessModes: []corev1.PersistentVolumeAccessMode{
-				corev1.ReadWriteOnce,
-			},
-			Resources: corev1.VolumeResourceRequirements{
-				Requests: corev1.ResourceList{
-					corev1.ResourceStorage: resource.MustParse("1Gi"),
-				},
-			},
-		},
-	}
-
-	// Ignore error if PVC already exists
-	err := s.K8sClient.CreatePVC(ctx, namespace, pvc)
-	if err != nil && !k8serrors.IsAlreadyExists(err) {
-		return nil, fmt.Errorf("failed to create plugins PVC: %v", err)
-	}
-
 	for _, vol := range []string{"main.tf", "versions.tf", "variables.tf"} {
 		if _, err := s.K8sClient.GetConfigMap(ctx, namespace, fmt.Sprintf("%s.%s", project, vol)); err == nil {
 			volumes = append(volumes, corev1.Volume{
@@ -169,6 +145,16 @@ func (s *ExecutorService) createTerraformJobTemplate(ctx context.Context, name, 
 							},
 							Env:          envVars,
 							VolumeMounts: volumeMounts,
+							Resources: corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("500m"),
+									corev1.ResourceMemory: resource.MustParse("1Gi"),
+								},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("200m"),
+									corev1.ResourceMemory: resource.MustParse("512Mi"),
+								},
+							},
 						},
 					},
 					Volumes: volumes,
