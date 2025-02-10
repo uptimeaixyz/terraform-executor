@@ -260,13 +260,20 @@ func (s *ExecutorService) Destroy(ctx context.Context, req *pb.DestroyRequest) (
 
 	_, err = s.K8sClient.CreateJob(ctx, req.UserId, job)
 	if err != nil {
-		return &pb.DestroyResponse{Success: false, Error: err.Error()}, nil
+		return &pb.DestroyResponse{
+			Success: false,
+			Error:   fmt.Sprintf("kubernetes job creation failed: %v", err),
+		}, nil
 	}
 
 	// Wait for job completion and get logs
 	output, err := s.waitForJobAndGetLogs(ctx, req.UserId, jobName)
 	if err != nil {
-		return &pb.DestroyResponse{Success: false, Error: err.Error()}, nil
+		return &pb.DestroyResponse{
+			Success:       false,
+			Error:         fmt.Sprintf("job execution failed: %v", err),
+			DestroyOutput: output,
+		}, nil
 	}
 
 	return &pb.DestroyResponse{Success: true, DestroyOutput: output}, nil
