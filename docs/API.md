@@ -277,11 +277,11 @@ grpcurl -plaintext -d '{
     "project": "project-a",
     "secrets": [
         {
-            "key": "AWS_ACCESS_KEY_ID",
+            "name": "AWS_ACCESS_KEY_ID",
             "value": "your-access-key-id"
         },
         {
-            "key": "AWS_SECRET_ACCESS_KEY",
+            "name": "AWS_SECRET_ACCESS_KEY",
             "value": "your-secret-access-key"
         }
     ]
@@ -362,27 +362,6 @@ grpcurl -plaintext -d '{
     "user_id": "user123",
     "project": "project-a"
 }' localhost:50051 executor.Executor/ClearSecretEnv
-```
-
-### ClearWorkspace
-
-Clears the Terraform workspace.
-
-**Request:** `ClearWorkspaceRequest`
-- `string user_id`: User identifier
-- `string project`: Name of the project
-
-**Response:** `ClearWorkspaceResponse`
-- `bool success`: Whether the workspace clear operation was successful
-- `string error`: Error message, if any
-
-**Example:**
-```bash
-# Clear the Terraform workspace
-grpcurl -plaintext -d '{
-    "user_id": "user123",
-    "project": "project-a"
-}' localhost:50051 executor.Executor/ClearWorkspace
 ```
 
 ### GetMainTf
