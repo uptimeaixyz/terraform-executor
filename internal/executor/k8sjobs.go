@@ -259,7 +259,7 @@ func (s *ExecutorService) waitForJobAndGetLogs(ctx context.Context, userId, jobN
 	select {
 	case <-done:
 		return result.logs, result.err
-	case <-time.After(5 * time.Minute):
+	case <-time.After(15 * time.Minute):
 		return "", fmt.Errorf("job timed out after 5 minutes")
 	}
 }
