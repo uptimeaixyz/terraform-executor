@@ -295,11 +295,6 @@ func (s *ExecutorService) CreateProject(ctx context.Context, req *pb.CreateProje
 		return &pb.CreateProjectResponse{Success: false, Error: err.Error()}, nil
 	}
 
-	// Ensure AWS credentials are fresh
-	if err := s.ensureAWSCredentials(ctx, req.UserId); err != nil {
-		return &pb.CreateProjectResponse{Success: false, Error: err.Error()}, nil
-	}
-
 	// Ensure PVC exists
 	if err := s.ensurePVC(ctx, req.UserId); err != nil {
 		return &pb.CreateProjectResponse{Success: false, Error: err.Error()}, nil
