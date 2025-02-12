@@ -318,3 +318,43 @@ func (s *ExecutorService) GetStateList(ctx context.Context, req *pb.GetStateList
 		StateListOutput: output,
 	}, nil
 }
+
+// GetTFShow returns output of "terraform state show" command
+func (s *ExecutorService) GetTFShow(ctx context.Context, req *pb.GetTFShowRequest) (*pb.GetTFShowResponse, error) {
+	if err := s.ensureResources(ctx, req.UserId); err != nil {
+		return &pb.GetTFShowResponse{
+			Success: false,
+			Error:   err.Error(),
+		}, nil
+	}
+
+	jobName := fmt.Sprintf("terraform-show-%s-%s", req.UserId, time.Now().Format("20060102150405"))
+	job, err := s.createTerraformJobTemplate(ctx, jobName, req.UserId, req.Project, "show", []string{"show", "-json", "-no-color"})
+	if err != nil {
+		return &pb.GetTFShowResponse{
+			Success: false,
+			Error:   fmt.Sprintf("job creation error: %v", err),
+		}, nil
+	}
+
+	_, err = s.K8sClient.CreateJob(ctx, req.UserId, job)
+	if err != nil {
+		return &pb.GetTFShowResponse{
+			Success: false,
+			Error:   fmt.Sprintf("kubernetes job error: %v", err),
+		}, nil
+	}
+
+	output, err := s.waitForJobAndGetLogs(ctx, req.UserId, jobName)
+	if err != nil {
+		return &pb.GetTFShowResponse{
+			Success: false,
+			Error:   fmt.Sprintf("job execution failed: %v", err),
+			Content: output,
+		}, nil
+	}
+	return &pb.GetTFShowResponse{
+		Success: true,
+		Content: output,
+	}, nil
+}
