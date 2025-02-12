@@ -24,6 +24,7 @@ const (
 	Executor_Apply_FullMethodName           = "/executor.Executor/Apply"
 	Executor_Destroy_FullMethodName         = "/executor.Executor/Destroy"
 	Executor_GetStateList_FullMethodName    = "/executor.Executor/GetStateList"
+	Executor_GetTFShow_FullMethodName       = "/executor.Executor/GetTFShow"
 	Executor_ClearCode_FullMethodName       = "/executor.Executor/ClearCode"
 	Executor_CreateProject_FullMethodName   = "/executor.Executor/CreateProject"
 	Executor_DeleteProject_FullMethodName   = "/executor.Executor/DeleteProject"
@@ -52,6 +53,8 @@ type ExecutorClient interface {
 	Destroy(ctx context.Context, in *DestroyRequest, opts ...grpc.CallOption) (*DestroyResponse, error)
 	// Retrieves the Terraform state list.
 	GetStateList(ctx context.Context, in *GetStateListRequest, opts ...grpc.CallOption) (*GetStateListResponse, error)
+	// Retrieves the Terraform state file content.
+	GetTFShow(ctx context.Context, in *GetTFShowRequest, opts ...grpc.CallOption) (*GetTFShowResponse, error)
 	// Clears the Terraform files.
 	ClearCode(ctx context.Context, in *ClearCodeRequest, opts ...grpc.CallOption) (*ClearCodeResponse, error)
 	// Creates a new project.
@@ -126,6 +129,16 @@ func (c *executorClient) GetStateList(ctx context.Context, in *GetStateListReque
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetStateListResponse)
 	err := c.cc.Invoke(ctx, Executor_GetStateList_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *executorClient) GetTFShow(ctx context.Context, in *GetTFShowRequest, opts ...grpc.CallOption) (*GetTFShowResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTFShowResponse)
+	err := c.cc.Invoke(ctx, Executor_GetTFShow_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -248,6 +261,8 @@ type ExecutorServer interface {
 	Destroy(context.Context, *DestroyRequest) (*DestroyResponse, error)
 	// Retrieves the Terraform state list.
 	GetStateList(context.Context, *GetStateListRequest) (*GetStateListResponse, error)
+	// Retrieves the Terraform state file content.
+	GetTFShow(context.Context, *GetTFShowRequest) (*GetTFShowResponse, error)
 	// Clears the Terraform files.
 	ClearCode(context.Context, *ClearCodeRequest) (*ClearCodeResponse, error)
 	// Creates a new project.
@@ -292,6 +307,9 @@ func (UnimplementedExecutorServer) Destroy(context.Context, *DestroyRequest) (*D
 }
 func (UnimplementedExecutorServer) GetStateList(context.Context, *GetStateListRequest) (*GetStateListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStateList not implemented")
+}
+func (UnimplementedExecutorServer) GetTFShow(context.Context, *GetTFShowRequest) (*GetTFShowResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTFShow not implemented")
 }
 func (UnimplementedExecutorServer) ClearCode(context.Context, *ClearCodeRequest) (*ClearCodeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ClearCode not implemented")
@@ -430,6 +448,24 @@ func _Executor_GetStateList_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ExecutorServer).GetStateList(ctx, req.(*GetStateListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Executor_GetTFShow_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTFShowRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExecutorServer).GetTFShow(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Executor_GetTFShow_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExecutorServer).GetTFShow(ctx, req.(*GetTFShowRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -640,6 +676,10 @@ var Executor_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetStateList",
 			Handler:    _Executor_GetStateList_Handler,
+		},
+		{
+			MethodName: "GetTFShow",
+			Handler:    _Executor_GetTFShow_Handler,
 		},
 		{
 			MethodName: "ClearCode",

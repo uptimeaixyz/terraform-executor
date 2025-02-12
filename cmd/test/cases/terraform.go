@@ -108,6 +108,38 @@ func GetTerraformTests(ctx context.Context, svc *executor.ExecutorService, userI
 			},
 		},
 		{
+			Name:     "Get Terraform Show",
+			Category: "Terraform",
+			Fn: func() error {
+				resp, err := svc.GetTFShow(ctx, &pb.GetTFShowRequest{
+					UserId:  userId,
+					Project: projectName,
+				})
+
+				// First check if the RPC call itself failed
+				if err != nil {
+					return fmt.Errorf("RPC error: %v", err)
+				}
+
+				// Always log the terraform show output if it exists
+				if resp.Content != "" {
+					log.Printf("\n📋 Terraform Show Output:\n%s\n", resp.Content)
+				}
+
+				// Then check the response status
+				if !resp.Success {
+					return fmt.Errorf("❌ terraform show failed: %s", resp.Error)
+				}
+
+				// Verify we have some output
+				if resp.Content == "" {
+					return fmt.Errorf("terraform show succeeded but output is empty")
+				}
+
+				return nil
+			},
+		},
+		{
 			Name:     "Destroy infrastructure",
 			Category: "Terraform",
 			Fn: func() error {

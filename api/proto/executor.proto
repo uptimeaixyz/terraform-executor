@@ -70,6 +70,19 @@ message GetStateListResponse {
   string error = 3;     // Error message, if any
 }
 
+// Request Get state file content
+message GetTFShowRequest {
+  string user_id = 1;  // User identifier
+  string project = 2;  // Name of the project
+}
+
+// Response with state file content
+message GetTFShowResponse {
+  bool success = 1;        // Whether the operation was successful
+  string content = 2;      // Content of state file
+  string error = 3;        // Error message, if any
+}
+
 // Request to clear terraform code
 message ClearCodeRequest {
   string user_id = 1;  // User identifier
@@ -226,6 +239,9 @@ service Executor {
 
   // Retrieves the Terraform state list.
   rpc GetStateList(GetStateListRequest) returns (GetStateListResponse);
+
+  // Retrieves the Terraform state file content.
+  rpc GetTFShow(GetTFShowRequest) returns (GetTFShowResponse);
 
   // Clears the Terraform files.
   rpc ClearCode(ClearCodeRequest) returns (ClearCodeResponse);

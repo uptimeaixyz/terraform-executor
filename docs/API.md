@@ -10,6 +10,7 @@
     - [Apply](#apply)
     - [Destroy](#destroy)
     - [GetStateList](#getstatelist)
+    - [GetTFShow](#gettfshow)
     - [ClearCode](#clearcode)
     - [ClearProviders](#clearproviders)
     - [AddSecretEnv](#addsecretenv)
@@ -212,6 +213,26 @@ grpcurl -plaintext -d '{
 }' localhost:50051 executor.Executor/GetStateList
 ```
 
+### GetTFShow
+Retrieves the Terraform show output.
+**Request:** `GetTFShowRequest`
+- `string user_id`: User identifier
+- `string project`: Name of the project
+
+**Response:** `GetTFShowResponse`
+- `bool success`: Whether the operation was successful
+- `string content`: Content of the Terraform show output
+- `string error`: Error message, if any
+
+**Example:**
+```bash
+# Get the content of the Terraform show output
+grpcurl -plaintext -d '{
+    "user_id": "user123",
+    "project": "project-a"
+}' localhost:50051 executor.Executor/GetTFShow
+```
+
 ### ClearCode
 
 Clears the main.tf file.
@@ -261,7 +282,7 @@ Adds secret environment variables to the Terraform configuration.
 **Request:** `AddSecretEnvRequest`
 - `string user_id`: User identifier
 - `string project`: Name of the project
-- `repeated SecretEnv secrets`: List of secret environment variables to add
+- `repeated Secret secrets`: List of secret environment variables to add
     - `string key`: Key of the secret environment variable
     - `string value`: Value of the secret environment variable
 
@@ -295,7 +316,7 @@ Adds secret variables to the Terraform configuration.
 **Request:** `AddSecretVarRequest`
 - `string user_id`: User identifier
 - `string project`: Name of the project
-- `repeated SecretVar secrets`: List of secret variables to add
+- `repeated Secret secrets`: List of secret variables to add
     - `string key`: Key of the secret variable
     - `string value`: Value of the secret variable
 
@@ -311,11 +332,11 @@ grpcurl -plaintext -d '{
     "project": "project-a",
     "secrets": [
         {
-            "key": "db_password",
+            "name": "db_password",
             "value": "your-db-password"
         },
         {
-            "key": "api_key",
+            "name": "api_key",
             "value": "your-api-key"
         }
     ]
