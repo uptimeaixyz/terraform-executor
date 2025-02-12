@@ -290,6 +290,13 @@ func (s *ExecutorService) CreateProject(ctx context.Context, req *pb.CreateProje
 		return &pb.CreateProjectResponse{Success: false, Error: err.Error()}, nil
 	}
 
+	// ensure resources
+	if err := s.ensureResources(ctx, req.UserId); err != nil {
+		return &pb.CreateProjectResponse{
+			Success: false,
+			Error:   err.Error(),
+		}, nil
+	}
 	return &pb.CreateProjectResponse{Success: true}, nil
 }
 
