@@ -116,7 +116,7 @@ func (s *ExecutorService) ensurePVC(ctx context.Context, namespace string) error
 			},
 			Resources: corev1.VolumeResourceRequirements{
 				Requests: corev1.ResourceList{
-					corev1.ResourceStorage: resource.MustParse("1Gi"),
+					corev1.ResourceStorage: resource.MustParse("2Gi"),
 				},
 			},
 		},
