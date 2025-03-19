@@ -223,6 +223,16 @@ message GetMainTfResponse {
   string error = 3;        // Error message, if any
 }
 
+// Request to subscribe to logs
+message LogStreamRequest {}
+
+// Response containing log updates
+message LogStreamResponse {
+  string log_line = 1; // A single line of the log
+  string user_id = 2;  // User identifier
+  string error = 3;     // Error message, if any
+}
+
 // The Executor service definition.
 service Executor {
   // Appends code to the Terraform configuration.
@@ -272,6 +282,9 @@ service Executor {
 
   // Gets the content of main.tf file
   rpc GetMainTf(GetMainTfRequest) returns (GetMainTfResponse);
+
+  // Streams logs of a job in real time.
+  rpc StreamLogs(LogStreamRequest) returns (stream LogStreamResponse);
 }
 
 // Health Check service definition

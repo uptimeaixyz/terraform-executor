@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.29.3
-// source: api/proto/executor.proto
+// source: executor.proto
 
 package executor
 
@@ -35,6 +35,7 @@ const (
 	Executor_AddSecretVar_FullMethodName    = "/executor.Executor/AddSecretVar"
 	Executor_ClearSecretVars_FullMethodName = "/executor.Executor/ClearSecretVars"
 	Executor_GetMainTf_FullMethodName       = "/executor.Executor/GetMainTf"
+	Executor_StreamLogs_FullMethodName      = "/executor.Executor/StreamLogs"
 )
 
 // ExecutorClient is the client API for Executor service.
@@ -75,6 +76,8 @@ type ExecutorClient interface {
 	ClearSecretVars(ctx context.Context, in *ClearSecretVarsRequest, opts ...grpc.CallOption) (*ClearSecretVarsResponse, error)
 	// Gets the content of main.tf file
 	GetMainTf(ctx context.Context, in *GetMainTfRequest, opts ...grpc.CallOption) (*GetMainTfResponse, error)
+	// Streams logs of a job in real time.
+	StreamLogs(ctx context.Context, in *LogStreamRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LogStreamResponse], error)
 }
 
 type executorClient struct {
@@ -245,6 +248,25 @@ func (c *executorClient) GetMainTf(ctx context.Context, in *GetMainTfRequest, op
 	return out, nil
 }
 
+func (c *executorClient) StreamLogs(ctx context.Context, in *LogStreamRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LogStreamResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Executor_ServiceDesc.Streams[0], Executor_StreamLogs_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[LogStreamRequest, LogStreamResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Executor_StreamLogsClient = grpc.ServerStreamingClient[LogStreamResponse]
+
 // ExecutorServer is the server API for Executor service.
 // All implementations must embed UnimplementedExecutorServer
 // for forward compatibility.
@@ -283,6 +305,8 @@ type ExecutorServer interface {
 	ClearSecretVars(context.Context, *ClearSecretVarsRequest) (*ClearSecretVarsResponse, error)
 	// Gets the content of main.tf file
 	GetMainTf(context.Context, *GetMainTfRequest) (*GetMainTfResponse, error)
+	// Streams logs of a job in real time.
+	StreamLogs(*LogStreamRequest, grpc.ServerStreamingServer[LogStreamResponse]) error
 	mustEmbedUnimplementedExecutorServer()
 }
 
@@ -340,6 +364,9 @@ func (UnimplementedExecutorServer) ClearSecretVars(context.Context, *ClearSecret
 }
 func (UnimplementedExecutorServer) GetMainTf(context.Context, *GetMainTfRequest) (*GetMainTfResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMainTf not implemented")
+}
+func (UnimplementedExecutorServer) StreamLogs(*LogStreamRequest, grpc.ServerStreamingServer[LogStreamResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method StreamLogs not implemented")
 }
 func (UnimplementedExecutorServer) mustEmbedUnimplementedExecutorServer() {}
 func (UnimplementedExecutorServer) testEmbeddedByValue()                  {}
@@ -650,6 +677,17 @@ func _Executor_GetMainTf_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Executor_StreamLogs_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(LogStreamRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ExecutorServer).StreamLogs(m, &grpc.GenericServerStream[LogStreamRequest, LogStreamResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Executor_StreamLogsServer = grpc.ServerStreamingServer[LogStreamResponse]
+
 // Executor_ServiceDesc is the grpc.ServiceDesc for Executor service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -722,8 +760,14 @@ var Executor_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Executor_GetMainTf_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/proto/executor.proto",
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "StreamLogs",
+			Handler:       _Executor_StreamLogs_Handler,
+			ServerStreams: true,
+		},
+	},
+	Metadata: "executor.proto",
 }
 
 const (
@@ -831,5 +875,5 @@ var Health_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/proto/executor.proto",
+	Metadata: "executor.proto",
 }

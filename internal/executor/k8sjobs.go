@@ -3,6 +3,9 @@ package executor
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
+	pb "terraform-executor/api/proto"
 	"time"
 
 	batchv1 "k8s.io/api/batch/v1"
@@ -11,7 +14,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
-	"strings"
 )
 
 // Helper function to create Terraform job
@@ -182,7 +184,7 @@ func (s *ExecutorService) getPodLogs(ctx context.Context, userId string, pod *co
 	}
 
 	if len(allLogs) == 0 {
-		return "", fmt.Errorf("no logs available from any container")
+		return "", nil
 	}
 
 	return strings.Join(allLogs, "\n\n"), nil
@@ -219,6 +221,10 @@ func (s *ExecutorService) waitForJobAndGetLogs(ctx context.Context, userId, jobN
 		}
 	}
 
+	err = s.streamPodLogsAndSendRPC(ctx, userId, jobName, *s.LogStream)
+	if err != nil {
+		return "", fmt.Errorf("streamPodLogsAndSendRPC failed to stream pod logs: %v", err)
+	}
 	watcher, err := s.K8sClient.WatchJob(ctx, userId, jobName)
 	if err != nil {
 		return "", fmt.Errorf("failed to watch job: %v", err)
@@ -262,4 +268,71 @@ func (s *ExecutorService) waitForJobAndGetLogs(ctx context.Context, userId, jobN
 	case <-time.After(15 * time.Minute):
 		return "", fmt.Errorf("job timed out after 15 minutes")
 	}
+}
+
+func (s *ExecutorService) streamPodLogsAndSendRPC(ctx context.Context, userId string, jobName string, stream pb.Executor_StreamLogsServer) error {
+	// Set up polling mechanism for logs (every 1 second)
+	logTicker := time.NewTicker(1 * time.Second)
+	defer logTicker.Stop()
+	var lastLog string // Keeps track of previously sent logs to avoid duplication
+
+	completionChan := make(chan error, 1) // Channel to signal completion
+
+	go func() {
+		failedAttempts := 0 // Counter for failed pod retrieval attempts
+
+		for {
+			select {
+			case <-ctx.Done():
+				// Stop streaming if context is cancelled
+				completionChan <- ctx.Err()
+				return
+			case <-logTicker.C:
+				podFresh, err := s.K8sClient.GetJobPod(ctx, userId, jobName)
+				if err != nil {
+					log.Printf("Error getting pod: %v", err)
+					failedAttempts++
+					if failedAttempts >= 5 {
+						log.Print("failed to get pod 5 times. exiting")
+						completionChan <- nil
+						return
+					}
+					continue // Corrected: Continue to the next tick, don't return
+				}
+
+				failedAttempts = 0 // Reset counter on successful retrieval
+
+				if podFresh.Status.Phase == corev1.PodSucceeded || podFresh.Status.Phase == corev1.PodFailed {
+					log.Printf("pod completed, stopping ticker")
+					completionChan <- nil
+					return
+				}
+
+				if podFresh.Status.Phase != corev1.PodRunning {
+					// Pod isn't in a state where logs can be retrieved
+					fmt.Println("Pod is not in a running state. Will retry.")
+					continue
+				}
+				// Pod is running, now try to fetch logs
+				runnerLogs, err := s.getPodLogs(ctx, userId, podFresh)
+				if err != nil {
+					// Log the error and continue retrying
+					fmt.Printf("Error retrieving logs: %v\n", err)
+					continue // Retry after the next tick
+				}
+				// Check if there are new logs (by comparing with last sent logs)
+				if runnerLogs != lastLog {
+					// Extract the new portion of logs by removing the prefix that matches previous logs
+					logDiff := strings.TrimPrefix(runnerLogs, lastLog)
+					lastLog = runnerLogs // Update the last seen logs
+
+					if err := stream.Send(&pb.LogStreamResponse{LogLine: logDiff, UserId: userId}); err != nil {
+						log.Printf("Error sending logs via stream: %v\n", err)
+						continue
+					}
+				}
+			}
+		}
+	}()
+	return <-completionChan // Wait for completion signal
 }

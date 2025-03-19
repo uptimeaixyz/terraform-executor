@@ -14,6 +14,7 @@ type ExecutorService struct {
 	pb.UnimplementedExecutorServer
 	K8sClient *k8s.K8sClient
 	AWSClient *awsclient.AWSClient
+	LogStream *pb.Executor_StreamLogsServer
 	Bucket    string
 	Debug     bool
 	ctx       context.Context

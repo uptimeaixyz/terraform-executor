@@ -319,6 +319,13 @@ func (s *ExecutorService) GetStateList(ctx context.Context, req *pb.GetStateList
 	}, nil
 }
 
+func (s *ExecutorService) StreamLogs(req *pb.LogStreamRequest, stream pb.Executor_StreamLogsServer) error {
+	s.LogStream = &stream
+	ctx := stream.Context()
+	<-ctx.Done() // Wait until the client disconnects
+	return ctx.Err()
+}
+
 // GetTFShow returns output of "terraform state show" command
 func (s *ExecutorService) GetTFShow(ctx context.Context, req *pb.GetTFShowRequest) (*pb.GetTFShowResponse, error) {
 	if err := s.ensureResources(ctx, req.UserId); err != nil {
