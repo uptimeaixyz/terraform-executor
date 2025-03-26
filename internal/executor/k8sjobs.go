@@ -190,7 +190,7 @@ func (s *ExecutorService) getPodLogs(ctx context.Context, userId string, pod *co
 	return strings.Join(allLogs, "\n\n"), nil
 }
 
-func (s *ExecutorService) waitForJobAndGetLogs(ctx context.Context, userId, jobName string) (string, error) {
+func (s *ExecutorService) waitForJobAndGetLogs(ctx context.Context, userId, project, requestId, jobName string) (string, error) {
 	var result struct {
 		logs string
 		err  error
@@ -221,7 +221,7 @@ func (s *ExecutorService) waitForJobAndGetLogs(ctx context.Context, userId, jobN
 		}
 	}
 
-	err = s.streamPodLogsAndSendRPC(ctx, userId, jobName, *s.LogStream)
+	err = s.streamPodLogsAndSendRPC(ctx, userId, project, requestId, jobName, *s.LogStream)
 	if err != nil {
 		return "", fmt.Errorf("streamPodLogsAndSendRPC failed to stream pod logs: %v", err)
 	}
@@ -270,7 +270,7 @@ func (s *ExecutorService) waitForJobAndGetLogs(ctx context.Context, userId, jobN
 	}
 }
 
-func (s *ExecutorService) streamPodLogsAndSendRPC(ctx context.Context, userId string, jobName string, stream pb.Executor_StreamLogsServer) error {
+func (s *ExecutorService) streamPodLogsAndSendRPC(ctx context.Context, userId, project, requestId string, jobName string, stream pb.Executor_StreamLogsServer) error {
 	// Set up polling mechanism for logs (every 1 second)
 	logTicker := time.NewTicker(1 * time.Second)
 	defer logTicker.Stop()
@@ -326,7 +326,7 @@ func (s *ExecutorService) streamPodLogsAndSendRPC(ctx context.Context, userId st
 					logDiff := strings.TrimPrefix(runnerLogs, lastLog)
 					lastLog = runnerLogs // Update the last seen logs
 
-					if err := stream.Send(&pb.LogStreamResponse{LogLine: logDiff, UserId: userId}); err != nil {
+					if err := stream.Send(&pb.LogStreamResponse{LogLine: logDiff, UserId: userId, Project: project, RequestId: requestId}); err != nil {
 						log.Printf("Error sending logs via stream: %v\n", err)
 						continue
 					}

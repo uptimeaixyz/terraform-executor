@@ -7,8 +7,9 @@ option go_package = "api/proto;executor";
 // Request to append code to configuration
 message AppendCodeRequest {
   string user_id = 1;  // User identifier
-  string project = 2;  // Name of the project
-  string code = 3;     // The Terraform configuration code snippet
+  string project = 2;  // Name of the project (workspaceId)
+  string requestId  = 3;
+  string code = 4;     // The Terraform configuration code snippet
 }
 
 // Response to append code to configuration
@@ -20,7 +21,8 @@ message AppendCodeResponse {
 // Request for Terraform Plan
 message PlanRequest {
   string user_id = 1;  // User identifier
-  string project = 2;  // Name of the project
+  string project = 2;  // Name of the project (workspaceId)
+  string requestId  = 3;
 }
 
 // Response for Terraform Plan
@@ -33,8 +35,9 @@ message PlanResponse {
 // Request for Terraform Apply
 message ApplyRequest {
   string user_id = 1;  // User identifier
-  string project = 2;  // Name of the project
-  string plan_file = 3; // Path to the saved Terraform plan file (optional)
+  string project = 2;  // Name of the project (workspaceId)
+  string requestId  = 3;
+  string plan_file = 4; // Path to the saved Terraform plan file (optional)
 }
 
 // Response for Terraform Apply
@@ -47,7 +50,8 @@ message ApplyResponse {
 // Request for Terraform Destroy
 message DestroyRequest {
   string user_id = 1;  // User identifier
-  string project = 2;  // Name of the project
+  string project = 2;  // Name of the project (workspaceId)
+  string requestId  = 3;
 }
 
 // Response for Terraform Destroy
@@ -60,7 +64,8 @@ message DestroyResponse {
 // Request for Terraform state list
 message GetStateListRequest {
   string user_id = 1;  // User identifier
-  string project = 2;  // Name of the project
+  string project = 2;  // Name of the project (workspaceId)
+  string requestId  = 3;
 }
 
 // Response for Terraform state list
@@ -74,6 +79,7 @@ message GetStateListResponse {
 message GetTFShowRequest {
   string user_id = 1;  // User identifier
   string project = 2;  // Name of the project
+  string requestId  = 3;
 }
 
 // Response with state file content
@@ -86,7 +92,8 @@ message GetTFShowResponse {
 // Request to clear terraform code
 message ClearCodeRequest {
   string user_id = 1;  // User identifier
-  string project = 2;  // Name of the project
+  string project = 2;  // Name of the project (workspaceId)
+  string requestId  = 3;
 }
 
 // Response to clear terraform code
@@ -98,7 +105,8 @@ message ClearCodeResponse {
 // Request to create new project
 message CreateProjectRequest {
   string user_id = 1;  // User identifier
-  string project = 2;  // Name of the project
+  string project = 2;  // Name of the project (workspaceId)
+  string requestId  = 3;
 }
 
 // Response to create new project
@@ -110,7 +118,8 @@ message CreateProjectResponse {
 // Request to delete project
 message DeleteProjectRequest {
   string user_id = 1;  // User identifier
-  string project = 2;  // Name of the project
+  string project = 2;  // Name of the project (workspaceId)
+  string requestId  = 3;
 }
 
 // Response to delete project
@@ -122,8 +131,9 @@ message DeleteProjectResponse {
 // Request to add providers to the Terraform configuration
 message AddProvidersRequest {
   string user_id = 1;  // User identifier
-  string project = 2;  // Name of the project
-  repeated Provider providers = 3; // List of providers to add
+  string project = 2;  // Name of the project (workspaceId)
+  string requestId  = 3;
+  repeated Provider providers = 4; // List of providers to add
 
   message Provider {
     string name = 1; // Name of the provider
@@ -141,7 +151,8 @@ message AddProvidersResponse {
 // Request to clear providers from the Terraform configuration
 message ClearProvidersRequest {
   string user_id = 1;  // User identifier
-  string project = 2;  // Name of the project
+  string project = 2;  // Name of the project (workspaceId)
+  string requestId  = 3;
 }
 
 // Response to clear providers from the Terraform configuration
@@ -153,8 +164,9 @@ message ClearProvidersResponse {
 // Request to add secret env variables to the Terraform configuration
 message AddSecretEnvRequest {
   string user_id = 1;  // User identifier
-  string project = 2;  // Name of the project
-  repeated Secret secrets = 3; // List of secrets to add
+  string project = 2;  // Name of the project (workspaceId)
+  string requestId  = 3;
+  repeated Secret secrets = 4; // List of secrets to add
 
   message Secret {
     string name = 1;  // Name of the secret
@@ -171,7 +183,8 @@ message AddSecretEnvResponse {
 // Request to clear secret env vars from the Terraform configuration
 message ClearSecretEnvRequest {
   string user_id = 1;  // User identifier
-  string project = 2;  // Name of the project
+  string project = 2;  // Name of the project (workspaceId)
+  string requestId  = 3;
 }
 
 // Response to clear secret env vars from the Terraform configuration
@@ -183,8 +196,9 @@ message ClearSecretEnvResponse {
 // Request to add secret terraform variables to the Terraform configuration
 message AddSecretVarRequest {
   string user_id = 1;  // User identifier
-  string project = 2;  // Name of the project
-  repeated Secret secrets = 3; // List of secrets to add
+  string project = 2;  // Name of the project (workspaceId)
+  string requestId  = 3;
+  repeated Secret secrets = 4; // List of secrets to add
 
   message Secret {
     string name = 1;  // Name of the secret
@@ -201,7 +215,8 @@ message AddSecretVarResponse {
 // Request to clear secret vars from the Terraform configuration
 message ClearSecretVarsRequest {
   string user_id = 1;  // User identifier
-  string project = 2;  // Name of the project
+  string project = 2;  // Name of the project (workspaceId)
+  string requestId  = 3;
 }
 
 // Response to clear secret vars from the Terraform configuration
@@ -214,6 +229,7 @@ message ClearSecretVarsResponse {
 message GetMainTfRequest {
   string user_id = 1;  // User identifier
   string project = 2;  // Name of the project
+  string requestId  = 3;
 }
 
 // Response with main.tf content
@@ -230,7 +246,9 @@ message LogStreamRequest {}
 message LogStreamResponse {
   string log_line = 1; // A single line of the log
   string user_id = 2;  // User identifier
-  string error = 3;     // Error message, if any
+  string project = 3;  // Name of the project (workspaceId)
+  string requestId  = 4;
+  string error = 5;     // Error message, if any
 }
 
 // The Executor service definition.
