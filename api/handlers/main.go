@@ -5,11 +5,12 @@ import (
 	"log"
 	"net"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 	pb "terraform-executor/api/proto"
 	"terraform-executor/internal/executor"
 	"terraform-executor/internal/health"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 // StartServer starts the gRPC server.

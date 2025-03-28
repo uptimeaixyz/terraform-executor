@@ -187,7 +187,7 @@ func (s *ExecutorService) Plan(ctx context.Context, req *pb.PlanRequest) (*pb.Pl
 	}
 
 	// Wait for job completion and get logs
-	output, err := s.waitForJobAndGetLogs(ctx, req.UserId, jobName)
+	output, err := s.waitForJobAndGetLogs(ctx, req.UserId, req.Project, req.RequestId, jobName)
 	if err != nil {
 		return &pb.PlanResponse{
 			Success:    false,
@@ -226,7 +226,7 @@ func (s *ExecutorService) Apply(ctx context.Context, req *pb.ApplyRequest) (*pb.
 			Error:   fmt.Sprintf("kubernetes job creation failed: %v", err),
 		}, nil
 	}
-	output, err := s.waitForJobAndGetLogs(ctx, req.UserId, jobName)
+	output, err := s.waitForJobAndGetLogs(ctx, req.UserId, req.Project, req.RequestId, jobName)
 	if err != nil {
 		if s.Debug {
 			fmt.Printf("⚠️ Job execution completed with error: %v\nOutput: %s\n", err, output)
@@ -267,7 +267,7 @@ func (s *ExecutorService) Destroy(ctx context.Context, req *pb.DestroyRequest) (
 	}
 
 	// Wait for job completion and get logs
-	output, err := s.waitForJobAndGetLogs(ctx, req.UserId, jobName)
+	output, err := s.waitForJobAndGetLogs(ctx, req.UserId, req.Project, req.RequestId, jobName)
 	if err != nil {
 		return &pb.DestroyResponse{
 			Success:       false,
@@ -305,7 +305,7 @@ func (s *ExecutorService) GetStateList(ctx context.Context, req *pb.GetStateList
 		}, nil
 	}
 
-	output, err := s.waitForJobAndGetLogs(ctx, req.UserId, jobName)
+	output, err := s.waitForJobAndGetLogs(ctx, req.UserId, req.Project, req.RequestId, jobName)
 	if err != nil {
 		return &pb.GetStateListResponse{
 			Success:         false,
@@ -317,6 +317,13 @@ func (s *ExecutorService) GetStateList(ctx context.Context, req *pb.GetStateList
 		Success:         true,
 		StateListOutput: output,
 	}, nil
+}
+
+func (s *ExecutorService) StreamLogs(req *pb.LogStreamRequest, stream pb.Executor_StreamLogsServer) error {
+	s.LogStream = &stream
+	ctx := stream.Context()
+	<-ctx.Done() // Wait until the client disconnects
+	return ctx.Err()
 }
 
 // GetTFShow returns output of "terraform state show" command
@@ -345,7 +352,7 @@ func (s *ExecutorService) GetTFShow(ctx context.Context, req *pb.GetTFShowReques
 		}, nil
 	}
 
-	output, err := s.waitForJobAndGetLogs(ctx, req.UserId, jobName)
+	output, err := s.waitForJobAndGetLogs(ctx, req.UserId, req.Project, req.RequestId, jobName)
 	if err != nil {
 		return &pb.GetTFShowResponse{
 			Success: false,
